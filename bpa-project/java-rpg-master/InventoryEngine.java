@@ -9,10 +9,13 @@ import javax.swing.ImageIcon;
  * Created by hpro1 on 11/29/16.
  */
 public class InventoryEngine implements Common{
-    // font size
+    // chipset dimensions of items
     public static final int ITEM_WIDTH = CS;
     public static final int ITEM_HEIGHT = CS;
 
+    // item scaling for inventory
+    public static final double ITEM_SCALE = 1.5;
+    
     // item image
     private Image itemsImage;
     // items position
@@ -35,8 +38,8 @@ public class InventoryEngine implements Common{
         g.drawImage(itemsImage,
                 x,
                 y,
-                (int)((x + ITEM_WIDTH) + 16),
-                (int)((y + ITEM_HEIGHT) + 16),
+                (int)((x + ITEM_WIDTH * ITEM_SCALE) - 2),
+                (int)((y + ITEM_HEIGHT * ITEM_SCALE) - 2),
                 pos.x,
                 pos.y,
                 pos.x + ITEM_WIDTH,

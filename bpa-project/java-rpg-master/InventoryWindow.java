@@ -126,7 +126,7 @@ public class InventoryWindow implements Common {
         // draw cursor
         g.setColor(Color.YELLOW);
         g.fillRect(cursorRect.x + INV_SPACE * invBoardX, cursorRect.y + INV_SPACE * invBoardY, cursorRect.width, cursorRect.height);
-
+        
         drawItems(g);
 
     }
@@ -144,39 +144,42 @@ public class InventoryWindow implements Common {
     }
 
     public void setDirection(int direction) {
-        isMoving = false;
         switch (direction) {
             case LEFT:
                 if (!isMoving) {
+                    isMoving = true;
                     if (moveLeft()) {
                         invBoardX--;
-                        isMoving = true;
                     }
                 }
+                isMoving = false;
                 break;
             case RIGHT:
                 if (!isMoving) {
+                    isMoving = true;
                     if (moveRight()) {
                         invBoardX++;
-                        isMoving = true;
                     }
                 }
+                isMoving = false;
                 break;
             case DOWN:
                 if (!isMoving) {
+                    isMoving = true;
                     if (moveDown()) {
                         invBoardY++;
-                        isMoving = true;
                     }
                 }
+                isMoving = false;
                 break;
             case UP:
                 if (!isMoving) {
+                    isMoving = true;
                     if (moveUp()) {
                         invBoardY--;
-                        isMoving = true;
                     }
                 }
+                isMoving = false;
                 break;
         }
     }
@@ -229,7 +232,7 @@ public class InventoryWindow implements Common {
     private void drawItems(Graphics g) {
         for (int i = 0; i < invBoard.length; i++) {
             for (int j = 0; j < invBoard[i].length; j++) {
-                inventoryEngine.drawItem(invInnerSquare.x + 48 * j, invInnerSquare.y + 48 * i, invBoard[i][j], g);
+                inventoryEngine.drawItem(invSquare.x + 48 * j, invSquare.y + 48 * i, invBoard[i][j], g);
             }
         }
     }
