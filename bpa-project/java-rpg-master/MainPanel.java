@@ -37,6 +37,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     private ActionKey downKey;
     private ActionKey enterKey;
     private ActionKey inventoryKey;
+    private ActionKey questKey;
     private ActionKey attackKey;
     private ActionKey tabKey;
 
@@ -48,6 +49,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
 
     private InventoryWindow inventoryWindow;
     private static Rectangle INV_RECT = new Rectangle(64, 96, 512, 352);
+    
+    private QuestWindow questWindow;
+    private static Rectangle QUE_RECT = new Rectangle(64, 96, 512, 352);
 
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
@@ -76,6 +80,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         tabKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         inventoryKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
+        questKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         attackKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
 
         // create map
@@ -97,6 +102,10 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         // create inventory window
         inventoryWindow = new InventoryWindow(INV_RECT);
 
+        // create quest window
+        questWindow = new QuestWindow(QUE_RECT);
+
+        
         // load BGM and sound clips
         loadSound();
 
@@ -139,6 +148,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
             messageWindowCheckInput();
         } else if (inventoryWindow.isVisible()) {
             inventoryWindowCheckInput();
+        } else if (questWindow.isVisible()) {
+            questWindowCheckInput();
         } else {
             mainWindowCheckInput();
         }
@@ -151,6 +162,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
 
         if(!inventoryWindow.isVisible()) {
+            heroMove();
+            characterMove();
+        }
+        
+        if(!questWindow.isVisible()) {
             heroMove();
             characterMove();
         }
@@ -196,6 +212,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
 
         // draw inventory window
         inventoryWindow.draw(dbg);
+        
+        // draw quest window
+        questWindow.draw(dbg);
 
         // display debug information
         if (DEBUG_MODE) {
@@ -303,6 +322,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
             downKey = new ActionKey(ActionKey.SLOWER_INPUT);
             inventoryWindow.show();
         }
+        if (questKey.isPressed()) {
+            questWindow.show();
+        }
 
         if (attackKey.isPressed()) {
             //TODO: initiate attack animation and shoot projectile
@@ -345,6 +367,20 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
             upKey = new ActionKey();
             downKey = new ActionKey();
             inventoryWindow.hide();
+        }
+        if (questKey.isPressed()) {
+            inventoryWindow.hide();
+            questWindow.show();
+        }
+    }
+    
+    private void questWindowCheckInput() {
+        if (questKey.isPressed()) {
+            questWindow.hide();
+        }
+        if (inventoryKey.isPressed()) {
+            questWindow.hide();
+            inventoryWindow.show();
         }
     }
 
@@ -401,9 +437,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         if (keyCode == KeyEvent.VK_ENTER) {
             enterKey.press();
         }
-        if (keyCode == KeyEvent.VK_Q) {
+        if (keyCode == KeyEvent.VK_I) {
             inventoryKey.press();
-            System.out.println("Q Key Pressed");
+        }
+        if (keyCode == KeyEvent.VK_Q) {
+            questKey.press();
         }
         if (keyCode == KeyEvent.VK_SPACE) {
             attackKey.press();
@@ -428,8 +466,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         if (keyCode == KeyEvent.VK_ENTER) {
             enterKey.release();
         }
-        if (keyCode == KeyEvent.VK_Q) {
+        if (keyCode == KeyEvent.VK_I) {
             inventoryKey.release();
+        }
+        if (keyCode == KeyEvent.VK_Q) {
+            questKey.release();
         }
         if (keyCode == KeyEvent.VK_SPACE) {
             attackKey.release();
