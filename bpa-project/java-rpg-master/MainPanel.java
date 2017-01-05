@@ -52,6 +52,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     
     private QuestWindow questWindow;
     private static Rectangle QUE_RECT = new Rectangle(64, 96, 512, 352);
+    
+    private HudWindow hudWindow;
 
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
@@ -105,6 +107,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         // create quest window
         questWindow = new QuestWindow(QUE_RECT);
 
+        // create hud window
+        hudWindow = new HudWindow();
+        
         
         // load BGM and sound clips
         loadSound();
@@ -215,6 +220,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         
         // draw quest window
         questWindow.draw(dbg);
+        
+        //draw hud window
+        hudWindow.draw(dbg);
 
         // display debug information
         if (DEBUG_MODE) {
