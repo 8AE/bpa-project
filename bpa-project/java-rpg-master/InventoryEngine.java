@@ -1,33 +1,26 @@
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
-import java.lang.*;
-import java.lang.Character;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 
-import static javax.swing.UIManager.put;
-
 /**
  * Created by hpro1 on 11/29/16.
  */
-public class InventoryEngine {
+public class InventoryEngine implements Common{
     // font size
-    public static final int ITEM_WIDTH = 16;
-    public static final int ITEM_HEIGHT = 22;
+    public static final int ITEM_WIDTH = CS;
+    public static final int ITEM_HEIGHT = CS;
 
     // item image
     private Image itemsImage;
     // items position
     private HashMap<Integer, Point> itemPos;
 
-    // current color
-    private int color;
-
     public InventoryEngine() {
         // load item images
-        ImageIcon icon = new ImageIcon(getClass().getResource("image/font.gif"));
+        ImageIcon icon = new ImageIcon(getClass().getResource("image/mapchip.gif"));
         itemsImage = icon.getImage();
 
         itemPos = new HashMap<Integer, Point>();
@@ -42,17 +35,29 @@ public class InventoryEngine {
         g.drawImage(itemsImage,
                 x,
                 y,
-                x + ITEM_WIDTH,
-                y + ITEM_HEIGHT,
-                pos.x + color,
+                (int)((x + ITEM_WIDTH) + 16),
+                (int)((y + ITEM_HEIGHT) + 16),
+                pos.x,
                 pos.y,
-                pos.x + color + ITEM_WIDTH,
+                pos.x + ITEM_WIDTH,
                 pos.y + ITEM_HEIGHT, null);
     }
 
     private void createHash() {
         // item sprite positions
         itemPos.put(new Integer(0), new Point(0, 0)); //torch
-        //TODO: Set sprite positions
+        itemPos.put(new Integer(1), new Point(32, 0));
+        itemPos.put(new Integer(2), new Point(64, 0));
+        itemPos.put(new Integer(3), new Point(96, 0));
+        itemPos.put(new Integer(4), new Point(128, 0));
+        itemPos.put(new Integer(5), new Point(160, 0));
+        itemPos.put(new Integer(6), new Point(192, 0));
+        itemPos.put(new Integer(7), new Point(224, 0));
+        itemPos.put(new Integer(8), new Point(0, 32));
+        itemPos.put(new Integer(9), new Point(32, 32));
+        itemPos.put(new Integer(10), new Point(64, 32));
+        itemPos.put(new Integer(11), new Point(96, 32));
+        itemPos.put(new Integer(12), new Point(128, 32));
+        //TODO: Set sprite positions and the points... need to know how many sprite per row
     }
 }

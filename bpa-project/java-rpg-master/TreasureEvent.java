@@ -19,13 +19,11 @@ public class TreasureEvent extends Event {
     public int toInt() {
 
         Dictionary dict = new Hashtable();
-
         //put(key, value)
         dict.put("ITEM", 0);
         dict.put("THIS", 1);
         dict.put("SOMETHING", 2);
         dict.put("YEAH", 3);
-
 
         return (Integer) dict.get(super.toString());
     }

@@ -38,6 +38,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     private ActionKey enterKey;
     private ActionKey inventoryKey;
     private ActionKey attackKey;
+    private ActionKey tabKey;
 
     private Thread gameLoop;
     private Random rand = new Random();
@@ -46,7 +47,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     private static Rectangle WND_RECT = new Rectangle(142, 480, 356, 140);
 
     private InventoryWindow inventoryWindow;
-    private static Rectangle INV_RECT = new Rectangle(64, 96, 512, 320);
+    private static Rectangle INV_RECT = new Rectangle(64, 96, 512, 352);
 
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
@@ -72,6 +73,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         rightKey = new ActionKey();
         upKey = new ActionKey();
         downKey = new ActionKey();
+        tabKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         inventoryKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         attackKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
@@ -261,9 +263,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
                 messageWindow.show();
                 if (!inventoryWindow.isFull()) {
                     //inventoryWindow.add(treasure.toInt());
+                    inventoryWindow.add(1);
                     messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName());
                 } else {
-                    messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName() + "|YOUR INVENTORY IS FULL!/YOU NEED TO MAKE SPACE!");
+                    messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName() + "|YOUR INVENTORY IS/FULL! YOU NEED TO/MAKE SPACE!");
+                    inventoryWindow.show();
                     //TODO: Force player to trash an item.
                 }
                 maps[mapNo].removeEvent(treasure);
@@ -292,6 +296,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
 
         if (inventoryKey.isPressed()) {
+            // set movement keys to only take initial press
+            leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            upKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            downKey = new ActionKey(ActionKey.SLOWER_INPUT);
             inventoryWindow.show();
         }
 
@@ -310,24 +319,31 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
 
     private void inventoryWindowCheckInput() {
         if (leftKey.isPressed()) {
-                //TODO: Make a cursor that moves around the inventory board have a parameter
-
-                inventoryWindow.setDirection(LEFT);
+            inventoryWindow.setDirection(LEFT);
         }
 
         if (rightKey.isPressed()) {
-                inventoryWindow.setDirection(RIGHT);
+            inventoryWindow.setDirection(RIGHT);
         }
 
         if (upKey.isPressed()) {
-                inventoryWindow.setDirection(UP);
+            inventoryWindow.setDirection(UP);
         }
 
         if (downKey.isPressed()) {
-                inventoryWindow.setDirection(DOWN);
+            inventoryWindow.setDirection(DOWN);
         }
 
+        if (tabKey.isPressed()) {
+            inventoryWindow.nextFocus();
+        }
+        
         if (inventoryKey.isPressed()) {
+            // set movement keys back to contant input
+            leftKey = new ActionKey();
+            rightKey = new ActionKey();
+            upKey = new ActionKey();
+            downKey = new ActionKey();
             inventoryWindow.hide();
         }
     }
