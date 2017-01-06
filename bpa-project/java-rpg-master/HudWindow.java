@@ -1,14 +1,12 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-
 import javax.swing.ImageIcon;
 
 /**
  * Created by Ahmad El-baba on 11/29/2016.
  */
-//640
-    //640
+
 public class HudWindow implements Common {
 
     //healthBar
@@ -38,13 +36,13 @@ public class HudWindow implements Common {
     private MessageEngine messageEngine;
 
     public HudWindow() {
-        messageEngine=new MessageEngine();
+        messageEngine = new MessageEngine();
         backround = new Rectangle(0,0,640,128);
 
         healthBar = new Rectangle(34 , 34 , 220, 28 );
         outerHealthBar = new Rectangle(32 , 32 , 224, 32 );
 
-      /*  ultamateBar = new Rectangle(34 , 34 , 220, 28 );
+        /*ultamateBar = new Rectangle(34 , 34 , 220, 28 );
         outerUltamateBar = new Rectangle(32 , 32 , 224, 32 );*/
 
         itemBox = new Rectangle(290 , 34 , 60, 60 );
@@ -62,8 +60,9 @@ public class HudWindow implements Common {
         // draw outer rect
         g.setColor(Color.BLACK);
         g.fillRect(backround.x, backround.y, backround.width, backround.height);
+        
         g.setColor(Color.WHITE);
-       g.fillRect(outerHealthBar.x, outerHealthBar.y, outerHealthBar.width, outerHealthBar.height);
+        g.fillRect(outerHealthBar.x, outerHealthBar.y, outerHealthBar.width, outerHealthBar.height);
         //g.fillRect(outerUltamateBar.x, outerUltamateBar.y, outerUltamateBar.width, outerUltamateBar.height);
         g.fillRect(outerItemBox.x, outerItemBox.y, outerItemBox.width, outerItemBox.height);
         g.fillRect(outerRightBox.x, outerRightBox.y, outerRightBox.width, outerRightBox.height);
@@ -74,9 +73,9 @@ public class HudWindow implements Common {
         messageEngine.drawMessage(440, 0, "Z", g);
         messageEngine.drawMessage(504, 0, "X", g);
 
-    g.setColor(Color.BLACK);
-          g.fillRect(healthBar.x, healthBar.y, healthBar.width, healthBar.height);
-       // g.fillRect(ultamateBar.x, ultamateBar.y, ultamateBar.width, ultamateBar.height);
+        g.setColor(Color.BLACK);
+        g.fillRect(healthBar.x, healthBar.y, healthBar.width, healthBar.height);
+        //g.fillRect(ultamateBar.x, ultamateBar.y, ultamateBar.width, ultamateBar.height);
         g.fillRect(itemBox.x, itemBox.y, itemBox.width, itemBox.height);
         g.fillRect(rightBox.x, rightBox.y, rightBox.width, rightBox.height);
         g.fillRect(leftBox.x, leftBox.y, leftBox.width, leftBox.height);

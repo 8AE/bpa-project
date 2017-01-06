@@ -39,7 +39,7 @@ public class ActionKey {
     }
 
     // reset key's state
-    public void reset() {
+    private void reset() {
         state = STATE_RELEASED;
         amount = 0;
        
@@ -54,7 +54,6 @@ public class ActionKey {
              // run thread
             threadSlower = new Thread(new ActionKey.SlowerInputThread());
             threadSlower.start();
-            System.out.println("Thread Started");
             isReady = true;
             state = STATE_WAITING_FOR_RELEASE;
             amount = 0;

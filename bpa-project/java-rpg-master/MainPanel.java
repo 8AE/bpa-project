@@ -20,7 +20,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     private static final int PERIOD = 20;
 
     // debug mode
-    private static final boolean DEBUG_MODE = true;
+    private static final boolean DEBUG_MODE = false;
 
     // map list
     private Map[] maps;
@@ -121,6 +121,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         gameLoop.start();
     }
 
+    @Override
     public void run() {
         long beforeTime, timeDiff, sleepTime;
 
@@ -161,17 +162,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     }
 
     private void gameUpdate() {
-        if (!messageWindow.isVisible()) {
-            heroMove();
-            characterMove();
-        }
-
-        if(!inventoryWindow.isVisible()) {
-            heroMove();
-            characterMove();
-        }
-        
-        if(!questWindow.isVisible()) {
+        if (!messageWindow.isVisible() && !inventoryWindow.isVisible() && !questWindow.isVisible()) {
             heroMove();
             characterMove();
         }
@@ -208,22 +199,21 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         } else if (offsetY > maps[mapNo].getHeight() - MainPanel.HEIGHT) {
             offsetY = maps[mapNo].getHeight() - MainPanel.HEIGHT;
         }
-
+        
         // draw map
         maps[mapNo].draw(dbg, offsetX, offsetY);
-
+        
+        // draw hud window
+        hudWindow.draw(dbg);
+        
         // draw message window
         messageWindow.draw(dbg);
-
-        // draw inventory window
+        
         inventoryWindow.draw(dbg);
         
         // draw quest window
         questWindow.draw(dbg);
         
-        //draw hud window
-        hudWindow.draw(dbg);
-
         // display debug information
         if (DEBUG_MODE) {
             Font font = new Font("SansSerif", Font.BOLD, 16);
@@ -277,7 +267,16 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
 
         if (enterKey.isPressed()) {
-            // cannot open window if hero is moving
+
+            // door open event
+            DoorEvent door = hero.open();
+            if (door != null) {
+                waveEngine.play("door");
+                maps[mapNo].removeEvent(door);
+                return;
+            }            
+
+            // cannot open window if hero is moving, but can open doors while moving (see above code)
             if (hero.isMoving()) {
                 return;
             }
@@ -298,14 +297,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
                     //TODO: Force player to trash an item.
                 }
                 maps[mapNo].removeEvent(treasure);
-                return;
-            }
-
-            // door
-            DoorEvent door = hero.open();
-            if (door != null) {
-                waveEngine.play("door");
-                maps[mapNo].removeEvent(door);
                 return;
             }
 
@@ -331,6 +322,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
             inventoryWindow.show();
         }
         if (questKey.isPressed()) {
+            // set movement keys to only take initial press
+            leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            upKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            downKey = new ActionKey(ActionKey.SLOWER_INPUT);
             questWindow.show();
         }
 
@@ -369,7 +365,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
         
         if (inventoryKey.isPressed()) {
-            // set movement keys back to contant input
+            // set movement keys back to constant input
             leftKey = new ActionKey();
             rightKey = new ActionKey();
             upKey = new ActionKey();
@@ -384,6 +380,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     
     private void questWindowCheckInput() {
         if (questKey.isPressed()) {
+            // set movement keys back to constant input
+            leftKey = new ActionKey();
+            rightKey = new ActionKey();
+            upKey = new ActionKey();
+            downKey = new ActionKey();
             questWindow.hide();
         }
         if (inventoryKey.isPressed()) {
@@ -427,6 +428,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
 
@@ -456,6 +458,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
         int keyCode = e.getKeyCode();
 
@@ -485,18 +488,19 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {
     }
 
     private void loadSound() {
         // load midi files
-        for (int i = 0; i < bgmNames.length; i++) {
-            midiEngine.load(bgmNames[i], "bgm/" + bgmNames[i] + ".mid");
+        for (String bgmName : bgmNames) {
+            midiEngine.load(bgmName, "bgm/" + bgmName + ".mid");
         }
 
         // load sound clip files
-        for (int i = 0; i < soundNames.length; i++) {
-            waveEngine.load(soundNames[i], "sound/" + soundNames[i] + ".wav");
+        for (String soundName : soundNames) {
+            waveEngine.load(soundName, "sound/" + soundName + ".wav");
         }
     }
 }

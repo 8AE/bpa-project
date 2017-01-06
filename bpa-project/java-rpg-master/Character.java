@@ -4,7 +4,7 @@ import java.awt.image.*;
 import javax.imageio.*;
 
 public class Character implements Common {
-    private static final int SPEED = 2;
+    private static final int SPEED = 4;
     public static final double PROB_MOVE = 0.02;
 
     private static BufferedImage image;

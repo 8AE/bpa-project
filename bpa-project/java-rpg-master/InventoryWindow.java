@@ -57,7 +57,7 @@ public class InventoryWindow implements Common {
 
         invSquare = new Rectangle(
                 rect.x + EDGE_WIDTH,
-                rect.y + INV_START + 2,
+                rect.y + INV_START + EDGE_WIDTH,
                 INV_SPACE - EDGE_WIDTH,
                 INV_SPACE - EDGE_WIDTH);
 
@@ -185,31 +185,19 @@ public class InventoryWindow implements Common {
     }
 
     private boolean moveLeft() {
-        if ((invBoardX > 0)) {
-            return true;
-        }
-        return false;
+        return (invBoardX > 0);
     }
 
     private boolean moveRight() {
-        if ((invBoardX < INV_ROW - 1)) {
-            return true;
-        }
-        return false;
+        return (invBoardX < INV_ROW - 1);
     }
 
     private boolean moveUp() {
-        if ((invBoardY > 0)) {
-            return true;
-        }
-        return false;
+        return (invBoardY > 0);
     }
 
     private boolean moveDown() {
-        if ((invBoardY < INV_COL - 1)) {
-            return true;
-        }
-        return false;
+        return (invBoardY < INV_COL - 1);
     }
 
     public void nextFocus() {
