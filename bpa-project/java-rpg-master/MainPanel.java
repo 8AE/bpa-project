@@ -20,7 +20,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     private static final int PERIOD = 20;
 
     // debug mode
-    private static final boolean DEBUG_MODE = false;
+    private static final boolean DEBUG_MODE = true;
 
     // map list
     private Map[] maps;
@@ -289,11 +289,15 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
                 messageWindow.show();
                 if (!inventoryWindow.isFull()) {
                     //inventoryWindow.add(treasure.toInt());
-                    inventoryWindow.add(1);
+                    inventoryWindow.add(12);
                     messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName());
                 } else {
                     messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName() + "|YOUR INVENTORY IS/FULL! YOU NEED TO/MAKE SPACE!");
-                    inventoryWindow.show();
+                    leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    upKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    downKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    inventoryWindow.show(InventoryWindow.TRASH_ITEM, 11);
                     //TODO: Force player to trash an item.
                 }
                 maps[mapNo].removeEvent(treasure);
@@ -372,9 +376,14 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
             downKey = new ActionKey();
             inventoryWindow.hide();
         }
+        
         if (questKey.isPressed()) {
             inventoryWindow.hide();
             questWindow.show();
+        }
+        
+        if (enterKey.isPressed()) {
+            inventoryWindow.select(inventoryWindow.getInvBoardXPos(), inventoryWindow.getInvBoardYPos());
         }
     }
     

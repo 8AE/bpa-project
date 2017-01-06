@@ -16,6 +16,9 @@ public class InventoryWindow implements Common {
     private static final int INV_COL = 5;
     private static final int INV_ROW = 5;
 
+    // constants of special commands for opening inventory
+    public static final int TRASH_ITEM = 0;
+    
     // outer frame
     private Rectangle rect;
     // inner frame
@@ -38,10 +41,14 @@ public class InventoryWindow implements Common {
     private int invBoardX = 0;
     private int invBoardY = 0;
     private int currentFocus = 0;
-    
     private boolean isMoving;
     private int moveLength;
-
+    private Color cursorColor;
+    
+    // trashing an item
+    private boolean isTrashing = false;
+    private int itemOnStandBy = -1;
+    
     private InventoryEngine inventoryEngine;
     private MessageEngine messageEngine;
 
@@ -124,7 +131,13 @@ public class InventoryWindow implements Common {
         messageEngine.drawMessage(74, 134, "INVENTORY", g);
 
         // draw cursor
-        g.setColor(Color.YELLOW);
+        cursorColor = Color.YELLOW;
+        
+        if (isTrashing) {
+            cursorColor = Color.RED;
+        }
+        
+        g.setColor(cursorColor);
         g.fillRect(cursorRect.x + INV_SPACE * invBoardX, cursorRect.y + INV_SPACE * invBoardY, cursorRect.width, cursorRect.height);
         
         drawItems(g);
@@ -134,9 +147,20 @@ public class InventoryWindow implements Common {
     public void show() {
         isVisible = true;
     }
+    
+    public void show(int specialCommand, int num) {
+        isVisible = true;
+        switch (specialCommand) {
+            case TRASH_ITEM:
+                isTrashing = true;
+                itemOnStandBy = num;
+                break;
+        }
+    }
 
     public void hide() {
         isVisible = false;
+        isTrashing = false;
     }
 
     public boolean isVisible() {
@@ -227,6 +251,10 @@ public class InventoryWindow implements Common {
 
     public int getInvBoardPos() { return invBoard[invBoardX][invBoardY];}
 
+    public int getInvBoardXPos() { return invBoardY; } // These are opposite on purpose
+                                                       // since they are opposite for
+    public int getInvBoardYPos() { return invBoardX; } // the items' positions on GUI
+    
     public void add(int i) {
         findOpen:
         for (int k = 0; k < invBoard.length; k++) {
@@ -236,6 +264,19 @@ public class InventoryWindow implements Common {
                     break findOpen;
                 }
             }
+        }
+    }
+    
+    public void delete(int posX, int posY) {
+        invBoard[posX][posY] = itemOnStandBy;
+        itemOnStandBy = -1;
+    }
+    
+    public void select(int posX, int posY) {
+        if (isTrashing) {
+            delete(posX, posY);
+            isTrashing = false;
+            return;
         }
     }
 
