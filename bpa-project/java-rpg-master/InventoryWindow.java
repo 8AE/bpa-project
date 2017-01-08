@@ -19,6 +19,10 @@ public class InventoryWindow implements Common {
     // constants of special commands for opening inventory
     public static final int TRASH_ITEM = 0;
     
+    // constants for focuses
+    private final int MAIN_FOCUS = 0;
+    private final int TRASH_FOCUS = 1;
+    
     // outer frame
     private Rectangle rect;
     // inner frame
@@ -29,7 +33,9 @@ public class InventoryWindow implements Common {
     private Rectangle invInnerSquare;
     // cursor
     private Rectangle cursorRect;
-
+    // trash
+    private Rectangle trashRect;
+    
     // is message window visible ?
     private boolean isVisible = false;
 
@@ -80,6 +86,14 @@ public class InventoryWindow implements Common {
                 INV_SPACE - EDGE_WIDTH,
                 INV_SPACE - EDGE_WIDTH);
 
+        trashRect = new Rectangle(
+                rect.x + INV_SPACE*6,
+                rect.y + INV_SPACE*6,
+                INV_SPACE,
+                INV_SPACE
+                
+        );
+        
         inventoryEngine = new InventoryEngine();
         messageEngine = new MessageEngine();
 
@@ -127,19 +141,31 @@ public class InventoryWindow implements Common {
                 g.fillRect(invSquare.x + (i * INV_SPACE), invSquare.y + (j * INV_SPACE), invSquare.width, invSquare.height);
             }
         }
+        
+        // draw trash square
+        g.setColor(Color.GREEN);
+        g.fillRect(trashRect.x, trashRect.y, trashRect.width, trashRect.height);
 
         messageEngine.drawMessage(74, 134, "INVENTORY", g);
-
-        // draw cursor
-        cursorColor = Color.YELLOW;
+        if (currentFocus == MAIN_FOCUS) {
+            // draw cursor
+            cursorColor = Color.YELLOW;
         
-        if (isTrashing) {
-            cursorColor = Color.RED;
+            if (isTrashing) {
+                cursorColor = Color.RED;
+            }
+        
+            g.setColor(cursorColor);
+            g.fillRect(cursorRect.x + INV_SPACE * invBoardX, cursorRect.y + INV_SPACE * invBoardY, cursorRect.width, cursorRect.height);
+            
+        } else if (currentFocus == TRASH_FOCUS) {
+            //draw cursor
+            cursorColor = Color.YELLOW;
+            g.setColor(cursorColor);
+            g.fillRect(trashRect.x, trashRect.y, trashRect.width, trashRect.height);
+            
         }
-        
-        g.setColor(cursorColor);
-        g.fillRect(cursorRect.x + INV_SPACE * invBoardX, cursorRect.y + INV_SPACE * invBoardY, cursorRect.width, cursorRect.height);
-        
+
         drawItems(g);
 
     }
@@ -225,7 +251,7 @@ public class InventoryWindow implements Common {
     }
 
     public void nextFocus() {
-        if (currentFocus <= 3) {
+        if (currentFocus <= 1) {
             currentFocus++;
         } else {
             currentFocus = 0;
@@ -272,10 +298,14 @@ public class InventoryWindow implements Common {
         itemOnStandBy = -1;
     }
     
-    public void select(int posX, int posY) {
+    public void select() {
         if (isTrashing) {
-            delete(posX, posY);
+            delete(getInvBoardXPos(), getInvBoardYPos());
             isTrashing = false;
+            return;
+        } else if (currentFocus == TRASH_FOCUS) {
+            isTrashing = true;
+            currentFocus = 0;
             return;
         }
     }

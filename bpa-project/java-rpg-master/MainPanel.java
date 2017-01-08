@@ -298,7 +298,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
                     upKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     downKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     inventoryWindow.show(InventoryWindow.TRASH_ITEM, 11);
-                    //TODO: Force player to trash an item.
+                    
                 }
                 maps[mapNo].removeEvent(treasure);
                 return;
@@ -341,9 +341,20 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
 
     private void messageWindowCheckInput() {
         if (enterKey.isPressed()) {
+            if (messageWindow.isCommand()) {
+                messageWindow.checkCommand(hero.talkWith());
+            }
             if (messageWindow.nextPage()) {
                 messageWindow.hide();
             }
+        }
+        
+        if (leftKey.isPressed() && MessageWindow.selectFlag && MessageWindow.selectOption == 1) {
+            messageWindow.cursorLeft();
+        }
+        
+        if (rightKey.isPressed() && MessageWindow.selectFlag && MessageWindow.selectOption == 0) {
+            messageWindow.cursorRight();
         }
     }
 
@@ -383,7 +394,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
         
         if (enterKey.isPressed()) {
-            inventoryWindow.select(inventoryWindow.getInvBoardXPos(), inventoryWindow.getInvBoardYPos());
+            inventoryWindow.select();
         }
     }
     
@@ -465,6 +476,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         if (keyCode == KeyEvent.VK_SPACE) {
             attackKey.press();
         }
+        if (keyCode == KeyEvent.VK_P) {
+            tabKey.press();
+        }
     }
 
     @Override
@@ -494,6 +508,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
         if (keyCode == KeyEvent.VK_SPACE) {
             attackKey.release();
+        }
+        if (keyCode == KeyEvent.VK_P) {
+            tabKey.release();
         }
     }
 
