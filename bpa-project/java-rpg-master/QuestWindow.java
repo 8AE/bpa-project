@@ -41,7 +41,7 @@ public class QuestWindow implements Common {
         
         g.setColor(Color.WHITE);
         messageEngine.drawMessage(66, 96, "QUESTS", g);
-      }
+    }
       
     public void show() {
         isVisible = true;

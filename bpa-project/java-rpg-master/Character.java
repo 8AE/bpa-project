@@ -292,6 +292,10 @@ public class Character implements Common {
     public void setDirection(int dir) {
         direction = dir;
     }
+    
+    public int getDirection() {
+        return direction;
+    }
 
     public boolean isMoving() {
         return isMoving;
