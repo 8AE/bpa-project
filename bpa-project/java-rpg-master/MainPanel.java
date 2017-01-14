@@ -58,6 +58,12 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
 
+        //Quests
+    int questLimit = 50;
+    int currentQuest = 0;
+    private QuestSystem[] questList = new QuestSystem[questLimit];
+         // creating quest sample  createQuest(questList[currentQuest], "TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
+    
     // BGM
     // from TAM Music Factory http://www.tam-music.com/
     private static final String[] bgmNames = {"castle", "field"};
@@ -237,6 +243,21 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
     }
 
+    private void createQuest(QuestSystem quest, String QN, String desc, int exp, String reward) {
+
+        quest.createQuest(QN, desc, exp, reward);
+        questWindow.sendQuestList(questList, currentQuest);
+        currentQuest++;
+
+    }
+    private void finishQuest(String questTitle){
+        for(int i=0;i>questList.length;i++){
+            if(questTitle.contains(questList[i].getQuestName())){
+               questList[i].setQuestFinished(true); 
+            }
+        }
+        questWindow.sendQuestList(questList, currentQuest);
+    }
     private void mainWindowCheckInput() {
         if (leftKey.isPressed()) {
             if (!hero.isMoving()) {
@@ -311,6 +332,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
                     messageWindow.setMessage(c.getMessage());
                     messageWindow.show();
                 } else {
+               
                     messageWindow.setMessage("THERE IS NO ONE/IN THAT DIRECTION");
                     messageWindow.show();
                 }
@@ -391,6 +413,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         if (questKey.isPressed()) {
             inventoryWindow.hide();
             questWindow.show();
+            
         }
         
         if (enterKey.isPressed()) {
@@ -407,12 +430,26 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
             downKey = new ActionKey();
             questWindow.hide();
         }
+          if (upKey.isPressed()) {
+            System.out.println("here");
+            questWindow.setDirection(UP);
+        }
+
+        if (downKey.isPressed()) {
+            System.out.println("here");
+            questWindow.setDirection(DOWN);
+        }
         if (inventoryKey.isPressed()) {
             questWindow.hide();
             inventoryWindow.show();
         }
     }
 
+    private void refreshQuests() {
+        for (int i = 0; i < questList.length; i++) {
+            questList[i] = new QuestSystem();
+        }
+    }
     private void heroMove() {
         if (hero.isMoving()) {
             if (hero.move()) {
