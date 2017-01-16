@@ -168,12 +168,19 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
     }
 
-    private void gameUpdate() {
+   private void gameUpdate() {
         if (!messageWindow.isVisible() && !inventoryWindow.isVisible() && !questWindow.isVisible()) {
             heroMove();
             characterMove();
+            updateStats();
         }
     }
+public void updateStats(){
+    //update health, stats, items,
+    hudWindow.updateHealth(hero.getHealth());
+    
+    
+}
 
     private void gameRender() {
         if (dbImage == null) {
