@@ -10,6 +10,7 @@ import javax.swing.ImageIcon;
 public class HudWindow implements Common {
 
     //healthBar
+    private Rectangle healthBarBackround;
     private Rectangle healthBar;
     //healthBar outline
     private Rectangle outerHealthBar;
@@ -34,12 +35,18 @@ public class HudWindow implements Common {
 
     //Message Engine
     private MessageEngine messageEngine;
+    
+    private double health;
+    
+    
+    
 
     public HudWindow() {
         messageEngine = new MessageEngine();
         backround = new Rectangle(0,0,640,128);
 
-        healthBar = new Rectangle(34 , 34 , 220, 28 );
+        healthBarBackround = new Rectangle(34 , 34 , 220, 28 );
+         healthBar = new Rectangle(34 , 34 , 220, 28 );
         outerHealthBar = new Rectangle(32 , 32 , 224, 32 );
 
         /*ultamateBar = new Rectangle(34 , 34 , 220, 28 );
@@ -55,7 +62,13 @@ public class HudWindow implements Common {
         outerLeftBox = new Rectangle(416 , 32 , 64, 64 );
 
     }
-
+public void updateHealth(int health){
+   this.health = health/100.0;
+   
+   
+    
+    
+}
     public void draw(Graphics g) {
         // draw outer rect
         g.setColor(Color.BLACK);
@@ -74,11 +87,13 @@ public class HudWindow implements Common {
         messageEngine.drawMessage(504, 0, "X", g);
 
         g.setColor(Color.BLACK);
-        g.fillRect(healthBar.x, healthBar.y, healthBar.width, healthBar.height);
+        g.fillRect(healthBarBackround.x, healthBarBackround.y, healthBarBackround.width, healthBarBackround.height);
         //g.fillRect(ultamateBar.x, ultamateBar.y, ultamateBar.width, ultamateBar.height);
         g.fillRect(itemBox.x, itemBox.y, itemBox.width, itemBox.height);
         g.fillRect(rightBox.x, rightBox.y, rightBox.width, rightBox.height);
         g.fillRect(leftBox.x, leftBox.y, leftBox.width, leftBox.height);
 
+         g.setColor(Color.RED);
+                    g.fillRect(healthBar.x, healthBar.y, (int)(healthBar.width *health), healthBar.height);
     }
 }
