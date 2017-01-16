@@ -31,6 +31,11 @@ public class Character implements Common {
 
     // reference to Map
     private Map map;
+    
+    //Character stats
+    private int health = 100;
+    private int attack = 5;
+    private int defence = 1;
 
     public Character(int x, int y, int id, int direction,
                      int moveType, Map map) {
@@ -69,6 +74,30 @@ public class Character implements Common {
                     cx + CS + count * CS,
                     cy + direction * CS + CS,
                     null);
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public int getAttack() {
+        return attack;
+    }
+
+    public void setAttack(int attack) {
+        this.attack = attack;
+    }
+
+    public int getDefence() {
+        return defence;
+    }
+
+    public void setDefence(int defence) {
+        this.defence = defence;
     }
 
     public boolean move() {
