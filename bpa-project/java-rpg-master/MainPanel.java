@@ -61,7 +61,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         //Quests
     int questLimit = 50;
     int currentQuest = 0;
-    private QuestSystem[] questList = new QuestSystem[questLimit];
+    private Quest[] questList = new Quest[questLimit];
          // creating quest sample  createQuest(questList[currentQuest], "TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
     
     // BGM
@@ -115,6 +115,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
 
         // create hud window
         hudWindow = new HudWindow();
+        
         
         
         // load BGM and sound clips
@@ -243,7 +244,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         }
     }
 
-    private void createQuest(QuestSystem quest, String QN, String desc, int exp, String reward) {
+    private void createQuest(Quest quest, String QN, String desc, int exp, String reward) {
 
         quest.createQuest(QN, desc, exp, reward);
         questWindow.sendQuestList(questList, currentQuest);
@@ -447,7 +448,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
 
     private void refreshQuests() {
         for (int i = 0; i < questList.length; i++) {
-            questList[i] = new QuestSystem();
+            questList[i] = new Quest();
         }
     }
     private void heroMove() {

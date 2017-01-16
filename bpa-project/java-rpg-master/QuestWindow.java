@@ -2,7 +2,9 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
+import java.util.List;
 
 /**
  * Created by Ahmad El-baba on 1/3/2017.
@@ -11,7 +13,7 @@ public class QuestWindow implements Common {
 
     MessageEngine messageEngine;
     int currentQuest;
-    QuestSystem quests[] = new QuestSystem[26];
+    List<Quest> questList = new ArrayList();
 
     // width of white border
     private static final int EDGE_WIDTH = 2;
@@ -67,29 +69,32 @@ public class QuestWindow implements Common {
         g.drawRect(cursor.x, cursor.y + QuestSlotSpacing * questBoardSpot, cursor.width, cursor.height);
 
         //drawing quest titles
-        try {
-
-            for (int i = 0; i < quests.length; i++) {
-                if (quests[i].isQuestFinished()) {
+        if (!questList.isEmpty()) {
+            for (int i = 0; i < questList.size(); i++) {
+                if (questList.get(i).isQuestFinished()) {
                     g.setColor(Color.green);
                 } else {
                     g.setColor(Color.white);
                 }
-                messageEngine.drawMessage(70, 140 + i * 40, quests[i].getQuestName(), g);
+                messageEngine.drawMessage(70, 140 + i * 40, questList.get(i).getQuestName(), g);
+                
+                // why do we use questBoardSpot
                 if (cursor.contains(70, 140 + i * 40)) {
                     g.setColor(Color.white);
-                    messageEngine.drawMessage(300, 140, quests[questBoardSpot].getQuestDisctription(), g);
-                    messageEngine.drawMessage(300, 410, "REWARD " + String.valueOf(quests[questBoardSpot].getReward()), g);
+                    messageEngine.drawMessage(300, 140, questList.get(questBoardSpot).getQuestDisctription(), g);
+                    messageEngine.drawMessage(300, 410, "REWARD " + String.valueOf(questList.get(questBoardSpot).getReward()), g);
                 }
-
             }
-        } catch (Exception e) {
         }
 
     }
 
-    public void sendQuestList(QuestSystem[] quests, int currentQuestTransfer) {
-        this.quests = quests;
+    public void addQuest(Quest newQuest) {
+        questList.add(newQuest);
+    }
+    
+    public void sendQuestList(Quest[] quests, int currentQuestTransfer) {
+        //this.quests = quests;
         this.currentQuest = currentQuestTransfer;
     }
 
@@ -105,7 +110,9 @@ public class QuestWindow implements Common {
                 if (!isMoving) {
                     isMoving = true;
                     if (moveDown()) {
-                        questBoardSpot++;
+                        if (questBoardSpot <= questList.size()) {
+                            questBoardSpot++;
+                        }
                     }
                 }
                 isMoving = false;
@@ -114,6 +121,7 @@ public class QuestWindow implements Common {
                 if (!isMoving) {
                     isMoving = true;
                     if (moveUp()) {
+                        if (questBoardSpot >= 0)
                         questBoardSpot--;
                     }
                 }
