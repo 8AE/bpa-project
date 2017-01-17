@@ -1,4 +1,4 @@
-import java.awt.Color;
+ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -252,9 +252,9 @@ public void updateStats(){
         }
     }
 
-    private void createQuest(Quest quest, String QN, String desc, int exp, String reward) {
+    private void createQuest(String QN, String desc, int exp, String reward) {
 
-        quest.createQuest(QN, desc, exp, reward);
+        questList.add(new Quest(QN, desc, exp, reward));
         questWindow.sendQuestList(questList, currentQuest);
         currentQuest++;
 
@@ -345,7 +345,7 @@ public void updateStats(){
                     messageWindow.setMessage(c.getMessage());
                     messageWindow.show();
                 } else {
-               
+               createQuest("TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
                     messageWindow.setMessage("THERE IS NO ONE/IN THAT DIRECTION");
                     messageWindow.show();
                 }
