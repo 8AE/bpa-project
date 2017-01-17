@@ -4,7 +4,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import java.util.List;
-
 /**
  * Created by Ahmad El-baba on 1/3/2017.
  */
@@ -12,7 +11,7 @@ public class QuestWindow implements Common {
 
     MessageEngine messageEngine;
     int currentQuest;
-    List<Quest> questList = new ArrayList();
+  List<Quest> questList = new ArrayList();
 
     // width of white border
     private static final int EDGE_WIDTH = 2;
@@ -67,8 +66,8 @@ public class QuestWindow implements Common {
 
         g.drawRect(cursor.x, cursor.y + QuestSlotSpacing * questBoardSpot, cursor.width, cursor.height);
 
-        // drawing quest titles
-        if (!questList.isEmpty()) {
+        //drawing quest titles
+     if (!questList.isEmpty()) {
             for (int i = 0; i < questList.size(); i++) {
                 if (questList.get(i).isQuestFinished()) {
                     g.setColor(Color.green);
@@ -86,13 +85,14 @@ public class QuestWindow implements Common {
             }
         }
 
+    
+
     }
 
     public void addQuest(Quest newQuest) {
         questList.add(newQuest);
     }
-    
-    public void sendQuestList(List<Quest> quests, int currentQuestTransfer) {
+     public void sendQuestList(List<Quest> quests, int currentQuestTransfer) {
         this.questList = quests;
         this.currentQuest = currentQuestTransfer;
     }
@@ -109,9 +109,7 @@ public class QuestWindow implements Common {
                 if (!isMoving) {
                     isMoving = true;
                     if (moveDown()) {
-                        if (questBoardSpot <= questList.size()) {
-                            questBoardSpot++;
-                        }
+                        questBoardSpot++;
                     }
                 }
                 isMoving = false;
@@ -120,7 +118,6 @@ public class QuestWindow implements Common {
                 if (!isMoving) {
                     isMoving = true;
                     if (moveUp()) {
-                        if (questBoardSpot >= 0)
                         questBoardSpot--;
                     }
                 }
@@ -134,11 +131,25 @@ public class QuestWindow implements Common {
     }
 
     private boolean moveUp() {
-        return (questBoardSpot > 0);
+        
+         if(questBoardSpot==0){
+         questBoardSpot = currentQuest;
+        }else{
+               return (questBoardSpot > 0);
+        }
+       return(questBoardSpot == currentQuest+1);  
+   
+        
+        
     }
 
     private boolean moveDown() {
-        return (questBoardSpot < currentQuest);
+        if(questBoardSpot==currentQuest){
+         questBoardSpot = 0;
+        }else{
+           return (questBoardSpot < currentQuest);  
+        }
+       return(questBoardSpot == -1);  
     }
 
     public boolean isMoving() {
