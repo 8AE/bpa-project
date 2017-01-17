@@ -1,4 +1,3 @@
-
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -68,7 +67,7 @@ public class QuestWindow implements Common {
 
         g.drawRect(cursor.x, cursor.y + QuestSlotSpacing * questBoardSpot, cursor.width, cursor.height);
 
-        //drawing quest titles
+        // drawing quest titles
         if (!questList.isEmpty()) {
             for (int i = 0; i < questList.size(); i++) {
                 if (questList.get(i).isQuestFinished()) {
@@ -93,8 +92,8 @@ public class QuestWindow implements Common {
         questList.add(newQuest);
     }
     
-    public void sendQuestList(Quest[] quests, int currentQuestTransfer) {
-        //this.quests = quests;
+    public void sendQuestList(List<Quest> quests, int currentQuestTransfer) {
+        this.questList = quests;
         this.currentQuest = currentQuestTransfer;
     }
 
