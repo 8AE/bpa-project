@@ -7,6 +7,8 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -59,9 +61,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
     private WaveEngine waveEngine = new WaveEngine();
 
         //Quests
-    int questLimit = 50;
     int currentQuest = 0;
-    private Quest[] questList = new Quest[questLimit];
+    private List<Quest> questList = new ArrayList();
          // creating quest sample  createQuest(questList[currentQuest], "TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
     
     // BGM
@@ -259,11 +260,15 @@ public void updateStats(){
 
     }
     private void finishQuest(String questTitle){
-        for(int i=0;i>questList.length;i++){
-            if(questTitle.contains(questList[i].getQuestName())){
-               questList[i].setQuestFinished(true); 
+        
+        for(int i=0; i>questList.size(); i++){
+            
+            if(questTitle.contains(questList.get(i).getQuestName())){
+                
+               questList.get(i).setQuestFinished(true); 
             }
         }
+        
         questWindow.sendQuestList(questList, currentQuest);
     }
     private void mainWindowCheckInput() {
@@ -453,9 +458,10 @@ public void updateStats(){
         }
     }
 
+    // Sets all quests to default quest
     private void refreshQuests() {
-        for (int i = 0; i < questList.length; i++) {
-            questList[i] = new Quest();
+        for (int i = 0; i < questList.size(); i++) {
+            questList.add(new Quest());
         }
     }
     private void heroMove() {
