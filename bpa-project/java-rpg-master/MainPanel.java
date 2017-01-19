@@ -1,4 +1,4 @@
- import java.awt.Color;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -90,7 +90,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         inventoryKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         questKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
-        attackKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
+        attackKey = new ActionKey(ActionKey.SLOWER_INPUT);
 
         // create map
         maps = new Map[3];
@@ -100,7 +100,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common {
         mapNo = 0;  // initial map
 
         // create character
-        hero = new Character(6, 6, 0, DOWN, 0, maps[mapNo]);
+        hero = new Character(6, 6, 0, DOWN, 0, 0, maps[mapNo]);
 
         // add characters to the map
         maps[mapNo].addCharacter(hero);
@@ -331,7 +331,7 @@ public void updateStats(){
                     rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     upKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     downKey = new ActionKey(ActionKey.SLOWER_INPUT);
-                    inventoryWindow.show(InventoryWindow.TRASH_ITEM, 11);
+                    inventoryWindow.show(InventoryWindow.TRASH_ITEM, 12);
                     
                 }
                 maps[mapNo].removeEvent(treasure);
@@ -345,7 +345,7 @@ public void updateStats(){
                     messageWindow.setMessage(c.getMessage());
                     messageWindow.show();
                 } else {
-               createQuest("TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
+                    createQuest("TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
                     messageWindow.setMessage("THERE IS NO ONE/IN THAT DIRECTION");
                     messageWindow.show();
                 }
@@ -371,6 +371,8 @@ public void updateStats(){
 
         if (attackKey.isPressed()) {
             //TODO: initiate attack animation and shoot projectile
+            Attack attack = new Attack(hero.getX(), hero.getY(), hero.getDirection(), hero.getWeapon(), maps[mapNo]);
+            maps[mapNo].addAttack(attack);
         }
     }
 
@@ -474,7 +476,7 @@ public void updateStats(){
                     MoveEvent m = (MoveEvent)event;
                     maps[mapNo].removeCharacter(hero);
                     mapNo = m.destMapNo;
-                    hero = new Character(m.destX, m.destY, 0, DOWN, 0, maps[mapNo]);
+                    hero = new Character(m.destX, m.destY, 0, DOWN, 0, 0, maps[mapNo]);
                     maps[mapNo].addCharacter(hero);
                     midiEngine.play(maps[mapNo].getBgmName());
                 }

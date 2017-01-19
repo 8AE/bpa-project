@@ -19,6 +19,8 @@ public class Character implements Common {
     private int direction;
     // character's animation counter
     private int count;
+    // can this character be damaged?
+    private int damageable;
 
     private boolean isMoving;
     private int moveLength;
@@ -27,18 +29,21 @@ public class Character implements Common {
     private String message;
 
     // thread for character animation
-    private Thread threadAnime;
+    private Thread threadAnimation;
 
     // reference to Map
     private Map map;
     
+    // what is this character's weapon
+    private Weapon weapon;
+    
     //Character stats
-    private int health = 100;
+    private int health = 20;
     private int attack = 5;
     private int defence = 1;
 
     public Character(int x, int y, int id, int direction,
-                     int moveType, Map map) {
+                     int moveType, int damageable, Map map) {
         // init character
         this.x = x;
         this.y = y;
@@ -47,6 +52,7 @@ public class Character implements Common {
         this.id = id;
         this.direction = direction;
         this.moveType = moveType;
+        this.damageable = damageable;
         this.map = map;
 
         count = 0;
@@ -56,8 +62,8 @@ public class Character implements Common {
         }
 
         // run thread
-        threadAnime = new Thread(new AnimationThread());
-        threadAnime.start();
+        threadAnimation = new Thread(new AnimationThread());
+        threadAnimation.start();
     }
 
     public void draw(Graphics g, int offsetX, int offsetY) {
@@ -98,6 +104,14 @@ public class Character implements Common {
 
     public void setDefence(int defence) {
         this.defence = defence;
+    }
+    
+    public Weapon getWeapon() {
+        return weapon;
+    }
+    
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
     }
 
     public boolean move() {
@@ -345,6 +359,19 @@ public class Character implements Common {
 
     public int getMoveType() {
         return moveType;
+    }
+    
+    public boolean isDamageable() {
+        return damageable == 1;
+    }
+    
+    public void damage(int dmg) {
+        this.health-=dmg;
+    }
+    
+    public Rectangle getHitbox() {
+        Rectangle hitbox = new Rectangle(px, py, CS, CS);
+        return  hitbox;
     }
 
     private void loadImage(String filename) {

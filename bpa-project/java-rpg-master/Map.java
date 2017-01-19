@@ -23,10 +23,15 @@ public class Map implements Common {
     private Vector<Character> characters = new Vector<Character>();
     // events in this map
     private Vector<Event> events = new Vector<Event>();
-
+    // attacks in this map
+    private Vector<Attack> attacks = new Vector<Attack>();
+    
     // reference to MainPanel
     private MainPanel panel;
 
+    // the thread to monitor the attacks on characters
+    private Thread threadDamage;
+    
     private String mapFile;
     private String bgmName;
 
@@ -39,6 +44,10 @@ public class Map implements Common {
         if (image == null) {
             loadImage("image/mapchip.gif");
         }
+        
+        // run thread
+        threadDamage = new Thread(new Map.AttackDamageThread());
+        threadDamage.start();
     }
 
     public void draw(Graphics g, int offsetX, int offsetY) {
@@ -82,16 +91,30 @@ public class Map implements Common {
             }
         }
 
+        // check character health in this map for zero
+        for (int i = 0; i < characters.size(); i++) {
+            Character c = characters.get(i);
+            if (c.getHealth() == 0) {
+                removeCharacter(c);
+            }
+        }
+        
         // draw characters in this map
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
             c.draw(g, offsetX, offsetY);
         }
+        
+        // draw attacks in this map
+        for (int i = 0; i < attacks.size(); i++) {
+            Attack a = attacks.get(i);
+            a.draw(g, offsetX, offsetY);
+        }
     }
 
     public boolean isHit(int x, int y) {
         if (map[y][x] == 1 ||    // wall
-            map[y][x] == 2 ||    // throan
+            map[y][x] == 2 ||    // throne
             map[y][x] == 5) {    // sea
             return true;
         }
@@ -122,6 +145,14 @@ public class Map implements Common {
     public void removeCharacter(Character c) {
         characters.remove(c);
     }
+    
+    public void addAttack(Attack a) {
+        attacks.add(a);
+    }
+    
+    public void removeAttack(Attack a) {
+        attacks.remove(a);
+    }
 
     // is there a character in (x, y) ?
     public Character checkCharacter(int x, int y) {
@@ -129,6 +160,17 @@ public class Map implements Common {
             Character c = characters.get(i);
             if (c.getX() == x && c.getY() == y) {
                 return c;
+            }
+        }
+        return null;
+    }
+    
+    // is there an attack in (x, y) ?
+    public Attack checkAttack(int x, int y) {
+        for (int i = 0; i < attacks.size(); i++) {
+            Attack a = attacks.get(i);
+            if (a.getX() == x && a.getY() == y) {
+                return a;
             }
         }
         return null;
@@ -174,6 +216,10 @@ public class Map implements Common {
 
     public Vector<Character> getCharacters() {
         return characters;
+    }
+    
+    public Vector<Attack> getAttacks() {
+        return attacks;
     }
 
     public String getBgmName() {
@@ -249,8 +295,9 @@ public class Map implements Common {
         int id = Integer.parseInt(st.nextToken());
         int direction = Integer.parseInt(st.nextToken());
         int moveType = Integer.parseInt(st.nextToken());
+        int damagable = Integer.parseInt(st.nextToken());
         String message = st.nextToken();
-        Character c = new Character(x, y, id, direction, moveType, this);
+        Character c = new Character(x, y, id, direction, moveType, damagable, this);
         c.setMessage(message);
         characters.add(c);
     }
@@ -287,6 +334,30 @@ public class Map implements Common {
                 System.out.print(map[i][j]);
             }
             System.out.println();
+        }
+    }
+    
+    private class AttackDamageThread extends Thread {
+        public void run() {
+            while (true) {
+                for (int i = 0; i < characters.size(); i++) {
+                    for (int j = 0; j < attacks.size(); j++) {
+                        Character c = characters.get(i); 
+                        Attack a = attacks.get(j);
+                        
+                        if ( c.getHitbox().contains( new Point(a.getPX(), a.getPY()) ) && c.isDamageable()) {
+                            System.out.println("Here");
+                            c.damage(20);
+                        }
+                    }
+                }
+                
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
