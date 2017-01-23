@@ -377,16 +377,17 @@ public class Map implements Common {
 
         public void run() {
             while (true) {
+                attack:
                 for (int i = 0; i < characters.size(); i++) {
                     for (int j = 0; j < attacks.size(); j++) {
-                        Character c = characters.get(i);
+                        Character c = characters.get(i); 
                         Attack a = attacks.get(j);
-
-                        if (c.getHitbox().contains(new Point(a.getPX(), a.getPY())) && c.isDamageable()) {
-                            System.out.println("Here");
-                             c.setAttacked(true);
-                            c.damage(20);
-                           
+                        
+                        if ( c.getHitbox().contains( new Point(a.getPX(), a.getPY()) ) && c.isDamageable()) {
+                            c.damage(a.getWeapon().getDamage());
+                            c.setAttacked(true);
+                            a.removeAttack();
+                            break attack;
                         }
                     }
                 }
