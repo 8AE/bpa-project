@@ -1,3 +1,4 @@
+
 import java.awt.*;
 import java.io.*;
 import java.util.*;
@@ -5,6 +6,7 @@ import java.awt.image.*;
 import javax.imageio.*;
 
 public class Map implements Common {
+
     // map data
     private int[][] map;
 
@@ -25,15 +27,20 @@ public class Map implements Common {
     private Vector<Event> events = new Vector<Event>();
     // attacks in this map
     private Vector<Attack> attacks = new Vector<Attack>();
-    
+
     // reference to MainPanel
     private MainPanel panel;
 
     // the thread to monitor the attacks on characters
     private Thread threadDamage;
-    
+
     private String mapFile;
     private String bgmName;
+
+    private Rectangle healthBarBackround;
+    private Rectangle healthBar;
+    //healthBar outline
+    private Rectangle outerHealthBar;
 
     public Map(String mapFile, String eventFile, String bgmName, MainPanel panel) {
         this.mapFile = mapFile;
@@ -44,7 +51,11 @@ public class Map implements Common {
         if (image == null) {
             loadImage("image/mapchip.gif");
         }
-        
+
+        healthBarBackround = new Rectangle(2, -4, 30, 10);
+        healthBar = new Rectangle(2, 2, 30, 10);
+        outerHealthBar = new Rectangle(0, -6, 34, 14);
+
         // run thread
         threadDamage = new Thread(new Map.AttackDamageThread());
         threadDamage.start();
@@ -68,11 +79,11 @@ public class Map implements Common {
                 int cx = (map[i][j] % 8) * CS;
                 int cy = (map[i][j] / 8) * CS;
                 g.drawImage(image,
-                            tilesToPixels(j) - offsetX,
-                            tilesToPixels(i) - offsetY,
-                            tilesToPixels(j) - offsetX + CS,
-                            tilesToPixels(i) - offsetY + CS,
-                            cx, cy, cx + CS, cy + CS, panel);
+                        tilesToPixels(j) - offsetX,
+                        tilesToPixels(i) - offsetY,
+                        tilesToPixels(j) - offsetX + CS,
+                        tilesToPixels(i) - offsetY + CS,
+                        cx, cy, cx + CS, cy + CS, panel);
 
                 // draw events on (i, j)
                 for (int n = 0; n < events.size(); n++) {
@@ -81,11 +92,11 @@ public class Map implements Common {
                         cx = (event.id % 8) * CS;
                         cy = (event.id / 8) * CS;
                         g.drawImage(image,
-                                    tilesToPixels(j) - offsetX,
-                                    tilesToPixels(i) - offsetY,
-                                    tilesToPixels(j) - offsetX + CS,
-                                    tilesToPixels(i) - offsetY + CS,
-                                    cx, cy, cx + CS, cy + CS, panel);
+                                tilesToPixels(j) - offsetX,
+                                tilesToPixels(i) - offsetY,
+                                tilesToPixels(j) - offsetX + CS,
+                                tilesToPixels(i) - offsetY + CS,
+                                cx, cy, cx + CS, cy + CS, panel);
                     }
                 }
             }
@@ -98,24 +109,32 @@ public class Map implements Common {
                 removeCharacter(c);
             }
         }
-        
+
         // draw characters in this map
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
             c.draw(g, offsetX, offsetY);
         }
-        
+
         // draw attacks in this map
         for (int i = 0; i < attacks.size(); i++) {
             Attack a = attacks.get(i);
             a.draw(g, offsetX, offsetY);
         }
+//draw health bar for characters        
+        for (int i = 0; i < characters.size(); i++) {
+            Character c = characters.get(i);
+            drawHealthBar(c, g);
+
+        }
     }
 
     public boolean isHit(int x, int y) {
-        if (map[y][x] == 1 ||    // wall
-            map[y][x] == 2 ||    // throne
-            map[y][x] == 5) {    // sea
+        if (map[y][x] == 1
+                || // wall
+                map[y][x] == 2
+                || // throne
+                map[y][x] == 5) {    // sea
             return true;
         }
 
@@ -145,11 +164,11 @@ public class Map implements Common {
     public void removeCharacter(Character c) {
         characters.remove(c);
     }
-    
+
     public void addAttack(Attack a) {
         attacks.add(a);
     }
-    
+
     public void removeAttack(Attack a) {
         attacks.remove(a);
     }
@@ -164,7 +183,7 @@ public class Map implements Common {
         }
         return null;
     }
-    
+
     // is there an attack in (x, y) ?
     public Attack checkAttack(int x, int y) {
         for (int i = 0; i < attacks.size(); i++) {
@@ -191,7 +210,7 @@ public class Map implements Common {
     }
 
     public static int pixelsToTiles(double pixels) {
-        return (int)Math.floor(pixels / CS);
+        return (int) Math.floor(pixels / CS);
     }
 
     public static int tilesToPixels(int tiles) {
@@ -217,7 +236,7 @@ public class Map implements Common {
     public Vector<Character> getCharacters() {
         return characters;
     }
-    
+
     public Vector<Attack> getAttacks() {
         return attacks;
     }
@@ -241,11 +260,11 @@ public class Map implements Common {
             this.height = this.row * 32;
             this.map = new int[this.row][this.col];
 
-            for(int i = 0; i < this.row; ++i) {
+            for (int i = 0; i < this.row; ++i) {
                 line = e.readLine();
                 StringTokenizer st = new StringTokenizer(line, ",");
 
-                for(int j = 0; j < this.col; ++j) {
+                for (int j = 0; j < this.col; ++j) {
                     this.map[i][j] = Integer.parseInt(st.nextToken());
                 }
             }
@@ -261,9 +280,13 @@ public class Map implements Common {
             String line;
             while ((line = br.readLine()) != null) {
                 // skip null lines
-                if (line.equals("")) continue;
+                if (line.equals("")) {
+                    continue;
+                }
                 // skip comment lines
-                if (line.startsWith("#")) continue;
+                if (line.startsWith("#")) {
+                    continue;
+                }
                 StringTokenizer st = new StringTokenizer(line, ",");
                 String eventType = st.nextToken();
                 if (eventType.equals("CHARACTER")) {
@@ -336,22 +359,37 @@ public class Map implements Common {
             System.out.println();
         }
     }
-    
+
+    private void drawHealthBar(Character c, Graphics g) {
+    if(c.isAttacked()){
+      System.out.print("X "+healthBarBackround.x + c.getPX()+" Y:"+healthBarBackround.y + c.getPY());
+       
+        g.setColor(Color.BLACK);
+        g.fillRect(healthBarBackround.x + c.getPX(), healthBarBackround.y + c.getPY(), healthBarBackround.width, healthBarBackround.height);
+        g.setColor(Color.RED);
+        g.fillRect(healthBar.x+ c.getPX(), healthBar.y+ c.getPY(), (int) (healthBar.width * c.getHealthProportions()), healthBar.height);
+    }
+       
+    }
+
     private class AttackDamageThread extends Thread {
+
         public void run() {
             while (true) {
                 for (int i = 0; i < characters.size(); i++) {
                     for (int j = 0; j < attacks.size(); j++) {
-                        Character c = characters.get(i); 
+                        Character c = characters.get(i);
                         Attack a = attacks.get(j);
-                        
-                        if ( c.getHitbox().contains( new Point(a.getPX(), a.getPY()) ) && c.isDamageable()) {
+
+                        if (c.getHitbox().contains(new Point(a.getPX(), a.getPY())) && c.isDamageable()) {
                             System.out.println("Here");
+                             c.setAttacked(true);
                             c.damage(20);
+                           
                         }
                     }
                 }
-                
+
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {
@@ -360,4 +398,5 @@ public class Map implements Common {
             }
         }
     }
+  
 }
