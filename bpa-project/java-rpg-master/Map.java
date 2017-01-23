@@ -121,10 +121,11 @@ public class Map implements Common {
             Attack a = attacks.get(i);
             a.draw(g, offsetX, offsetY);
         }
-//draw health bar for characters        
+        
+        //draw health bar for characters        
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
-            drawHealthBar(c, g);
+            drawHealthBar(c, g, offsetX, offsetY);
 
         }
     }
@@ -360,14 +361,14 @@ public class Map implements Common {
         }
     }
 
-    private void drawHealthBar(Character c, Graphics g) {
+    private void drawHealthBar(Character c, Graphics g, int offsetX, int offsetY) {
     if(c.isAttacked()){
       System.out.print("X "+healthBarBackround.x + c.getPX()+" Y:"+healthBarBackround.y + c.getPY());
        
         g.setColor(Color.BLACK);
-        g.fillRect(healthBarBackround.x + c.getPX(), healthBarBackround.y + c.getPY(), healthBarBackround.width, healthBarBackround.height);
+        g.fillRect(healthBarBackround.x + c.getPX() - offsetX, healthBarBackround.y + c.getPY() - offsetY, healthBarBackround.width, healthBarBackround.height);
         g.setColor(Color.RED);
-        g.fillRect(healthBar.x+ c.getPX(), healthBar.y+ c.getPY(), (int) (healthBar.width * c.getHealthProportions()), healthBar.height);
+        g.fillRect(healthBar.x + c.getPX()- offsetX, healthBar.y + c.getPY() - offsetY, (int) (healthBar.width * c.getHealthProportions()), healthBar.height);
     }
        
     }
