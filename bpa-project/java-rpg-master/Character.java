@@ -1,9 +1,11 @@
+
 import java.awt.*;
 import java.io.*;
 import java.awt.image.*;
 import javax.imageio.*;
 
 public class Character implements Common {
+
     private static final int SPEED = 4;
     public static final double PROB_MOVE = 0.02;
 
@@ -28,22 +30,27 @@ public class Character implements Common {
     private int moveType;
     private String message;
 
+    private boolean isAttacked = false;
+
     // thread for character animation
     private Thread threadAnimation;
 
     // reference to Map
     private Map map;
-    
+
     // what is this character's weapon
     private Weapon weapon;
-    
+
     //Character stats
-    private int health = 20;
+    private int health = 100;
+    private double maxHealth = 100.0;
+    //this is the health for the bar
+    private double pHealth;
     private int attack = 5;
     private int defence = 1;
 
     public Character(int x, int y, int id, int direction,
-                     int moveType, int damageable, Map map) {
+            int moveType, int damageable, Map map) {
         // init character
         this.x = x;
         this.y = y;
@@ -71,15 +78,15 @@ public class Character implements Common {
         int cy = (id / 8) * (CS * 4);
         // switch image based on animation counter
         g.drawImage(image,
-                    px - offsetX,
-                    py - offsetY,
-                    px - offsetX + CS,
-                    py - offsetY + CS,
-                    cx + count * CS,
-                    cy + direction * CS,
-                    cx + CS + count * CS,
-                    cy + direction * CS + CS,
-                    null);
+                px - offsetX,
+                py - offsetY,
+                px - offsetX + CS,
+                py - offsetY + CS,
+                cx + count * CS,
+                cy + direction * CS,
+                cx + CS + count * CS,
+                cy + direction * CS + CS,
+                null);
     }
 
     public int getHealth() {
@@ -88,6 +95,7 @@ public class Character implements Common {
 
     public void setHealth(int health) {
         this.health = health;
+          updateHealthProportions(health);
     }
 
     public int getAttack() {
@@ -105,38 +113,46 @@ public class Character implements Common {
     public void setDefence(int defence) {
         this.defence = defence;
     }
-    
+
     public Weapon getWeapon() {
         return weapon;
     }
-    
+
     public void setWeapon(Weapon weapon) {
         this.weapon = weapon;
     }
 
+    public boolean isAttacked() {
+        return isAttacked;
+    }
+
+    public void setAttacked(boolean isAttacked) {
+        this.isAttacked = isAttacked;
+    }
+
     public boolean move() {
         switch (direction) {
-        case LEFT:
-            if (moveLeft()) {
-                // return true if pixel-based scrolling is completed.
-                return true;
-            }
-            break;
-        case RIGHT:
-            if (moveRight()) {
-                return true;
-            }
-            break;
-        case UP:
-            if (moveUp()) {
-                return true;
-            }
-            break;
-        case DOWN:
-            if (moveDown()) {
-                return true;
-            }
-            break;
+            case LEFT:
+                if (moveLeft()) {
+                    // return true if pixel-based scrolling is completed.
+                    return true;
+                }
+                break;
+            case RIGHT:
+                if (moveRight()) {
+                    return true;
+                }
+                break;
+            case UP:
+                if (moveUp()) {
+                    return true;
+                }
+                break;
+            case DOWN:
+                if (moveDown()) {
+                    return true;
+                }
+                break;
         }
 
         return false;
@@ -145,10 +161,14 @@ public class Character implements Common {
     private boolean moveLeft() {
         int nextX = x - 1;
         int nextY = y;
-        if (nextX < 0) nextX = 0;
+        if (nextX < 0) {
+            nextX = 0;
+        }
         if (!map.isHit(nextX, nextY)) {
             px -= Character.SPEED;
-            if (px < 0) px = 0;
+            if (px < 0) {
+                px = 0;
+            }
             moveLength += Character.SPEED;
             if (moveLength >= CS) {
                 // pixel-based scrolling is completed
@@ -169,11 +189,14 @@ public class Character implements Common {
     private boolean moveRight() {
         int nextX = x + 1;
         int nextY = y;
-        if (nextX > map.getCol() - 1) nextX = map.getCol() - 1;
+        if (nextX > map.getCol() - 1) {
+            nextX = map.getCol() - 1;
+        }
         if (!map.isHit(nextX, nextY)) {
             px += Character.SPEED;
-            if (px > map.getWidth() - CS)
+            if (px > map.getWidth() - CS) {
                 px = map.getWidth() - CS;
+            }
             moveLength += Character.SPEED;
             if (moveLength >= CS) {
                 x++;
@@ -193,10 +216,14 @@ public class Character implements Common {
     private boolean moveUp() {
         int nextX = x;
         int nextY = y - 1;
-        if (nextY < 0) nextY = 0;
+        if (nextY < 0) {
+            nextY = 0;
+        }
         if (!map.isHit(nextX, nextY)) {
             py -= Character.SPEED;
-            if (py < 0) py = 0;
+            if (py < 0) {
+                py = 0;
+            }
             moveLength += Character.SPEED;
             if (moveLength >= CS) {
                 y--;
@@ -215,11 +242,14 @@ public class Character implements Common {
     private boolean moveDown() {
         int nextX = x;
         int nextY = y + 1;
-        if (nextY > map.getRow() - 1) nextY = map.getRow() - 1;
+        if (nextY > map.getRow() - 1) {
+            nextY = map.getRow() - 1;
+        }
         if (!map.isHit(nextX, nextY)) {
             py += Character.SPEED;
-            if (py > map.getHeight() - CS)
+            if (py > map.getHeight() - CS) {
                 py = map.getHeight() - CS;
+            }
             moveLength += Character.SPEED;
             if (moveLength >= CS) {
                 y++;
@@ -240,22 +270,22 @@ public class Character implements Common {
         int nextX = 0;
         int nextY = 0;
         switch (direction) {
-        case LEFT:
-            nextX = x - 1;
-            nextY = y;
-            break;
-        case RIGHT:
-            nextX = x + 1;
-            nextY = y;
-            break;
-        case UP:
-            nextX = x;
-            nextY = y - 1;
-            break;
-        case DOWN:
-            nextX = x;
-            nextY = y + 1;
-            break;
+            case LEFT:
+                nextX = x - 1;
+                nextY = y;
+                break;
+            case RIGHT:
+                nextX = x + 1;
+                nextY = y;
+                break;
+            case UP:
+                nextX = x;
+                nextY = y - 1;
+                break;
+            case DOWN:
+                nextX = x;
+                nextY = y + 1;
+                break;
         }
 
         // is there a character?
@@ -263,18 +293,18 @@ public class Character implements Common {
         // a player and a character are opposed mutually.
         if (c != null) {
             switch (direction) {
-            case LEFT:
-                c.setDirection(RIGHT);
-                break;
-            case RIGHT:
-                c.setDirection(LEFT);
-                break;
-            case UP:
-                c.setDirection(DOWN);
-                break;
-            case DOWN:
-                c.setDirection(UP);
-                break;
+                case LEFT:
+                    c.setDirection(RIGHT);
+                    break;
+                case RIGHT:
+                    c.setDirection(LEFT);
+                    break;
+                case UP:
+                    c.setDirection(DOWN);
+                    break;
+                case DOWN:
+                    c.setDirection(UP);
+                    break;
             }
         }
         return c;
@@ -283,7 +313,7 @@ public class Character implements Common {
     public TreasureEvent search() {
         Event event = map.checkEvent(x, y);
         if (event instanceof TreasureEvent) {
-            return (TreasureEvent)event;
+            return (TreasureEvent) event;
         }
         return null;
     }
@@ -292,26 +322,26 @@ public class Character implements Common {
         int nextX = 0;
         int nextY = 0;
         switch (direction) {
-        case LEFT:
-            nextX = x - 1;
-            nextY = y;
-            break;
-        case RIGHT:
-            nextX = x + 1;
-            nextY = y;
-            break;
-        case UP:
-            nextX = x;
-            nextY = y - 1;
-            break;
-        case DOWN:
-            nextX = x;
-            nextY = y + 1;
-            break;
+            case LEFT:
+                nextX = x - 1;
+                nextY = y;
+                break;
+            case RIGHT:
+                nextX = x + 1;
+                nextY = y;
+                break;
+            case UP:
+                nextX = x;
+                nextY = y - 1;
+                break;
+            case DOWN:
+                nextX = x;
+                nextY = y + 1;
+                break;
         }
         Event event = map.checkEvent(nextX, nextY);
         if (event instanceof DoorEvent) {
-            return (DoorEvent)event;
+            return (DoorEvent) event;
         }
         return null;
     }
@@ -335,7 +365,7 @@ public class Character implements Common {
     public void setDirection(int dir) {
         direction = dir;
     }
-    
+
     public int getDirection() {
         return direction;
     }
@@ -360,18 +390,25 @@ public class Character implements Common {
     public int getMoveType() {
         return moveType;
     }
-    
+
     public boolean isDamageable() {
         return damageable == 1;
     }
-    
+
     public void damage(int dmg) {
-        this.health-=dmg;
+        this.health -= dmg;
+        updateHealthProportions(health);
+
     }
-    
+ public void updateHealthProportions(int health) {
+        this.pHealth = health / maxHealth;
+    }
+ public double getHealthProportions() {
+        return pHealth;
+    }
     public Rectangle getHitbox() {
         Rectangle hitbox = new Rectangle(px, py, CS, CS);
-        return  hitbox;
+        return hitbox;
     }
 
     private void loadImage(String filename) {
@@ -384,6 +421,7 @@ public class Character implements Common {
 
     // Animation Class
     private class AnimationThread extends Thread {
+
         public void run() {
             while (true) {
                 if (count == 0) {
