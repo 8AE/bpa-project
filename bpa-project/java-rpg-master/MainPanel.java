@@ -13,6 +13,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import javax.swing.Timer;
 import java.util.Vector;
@@ -85,12 +87,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     // The engines for the sounds are declared and initialized.
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
-    
     private QuestEngine questEngine;
 
     // Quests
     int currentQuest = 0;
-      private List<Quest> questList = new ArrayList();
+    private List<Quest> questList = new ArrayList();
     // creating quest sample  createQuest(questList[currentQuest], "TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
     
     // BGM
@@ -156,6 +157,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         // Create HUD.
         hudWindow = new HudWindow();
+        
+        // Create the popup window.
+        popup = new NotificationPopup(POP_RECT);
         
         // Load Backgound Music (BGM) and sound clips.
         loadSound();
@@ -273,7 +277,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         messageWindow.draw(dbg);
         
         // Draw message window.
-         popup.draw(dbg);
+        popup.draw(dbg);
         
         inventoryWindow.draw(dbg);
         
@@ -361,7 +365,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         }
         // An action is performed if there are object events in front of or under the hero, depending on the case.
         if (enterKey.isPressed()) {
-             if (questEvent != null) {
+            
+            QuestEvent questEvent = hero.questSearch();
+            if (questEvent != null) {
                // waveEngine.play("treasure");
                   messageWindow.setMessage("HERO FOUND/" + questEvent.getQuestName());
                 messageWindow.show();
@@ -372,6 +378,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 maps[mapNo].removeEvent(questEvent);
                 return;
             }
+             
             // Door is opened if there is one in front of the hero.
             DoorEvent door = hero.open();
             if (door != null) {
@@ -452,34 +459,35 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             maps[mapNo].addAttack(attack);
         }
     }
-private void checkTrigger(){
-      TriggerEvent trigger = hero.touch();
-      
-    try{
-  
-     
-       for (int t = 0; t <trigger.gettLocation().size(); t++) {  
-       for (int i = 0; i < questList.size(); i++) {
-            if (trigger.getPoint(t).equals(questList.get(i).DXY)) {
-     
-            
-              popup.setMessage("QUEST COMPLETE");
-              popup.show();
-             questList.get(i).setQuestFinished(true);
-             
-                maps[mapNo].removeEvent(trigger);
-                return;  
-                
-                
-            } 
-       }
-       }
-            
-    }catch(Exception e){
-        System.out.println(e);
+    
+    private void checkTrigger() {
+          TriggerEvent trigger = hero.touch();
+
+        try{
+
+
+           for (int t = 0; t <trigger.gettLocation().size(); t++) {  
+           for (int i = 0; i < questList.size(); i++) {
+                if (trigger.getPoint(t).equals(questList.get(i).DXY)) {
+
+
+                  popup.setMessage("QUEST COMPLETE");
+                  popup.show();
+                 questList.get(i).setQuestFinished(true);
+
+                    maps[mapNo].removeEvent(trigger);
+                    return;  
+
+
+                } 
+           }
+           }
+
+        }catch(Exception e){
+            System.out.println(e);
+        }
+
     }
-     
-}
     private void messageWindowCheckInput() {
         // Moves to the next page or exits the text box if there is no text left.
         if (enterKey.isPressed()) {
@@ -568,6 +576,10 @@ private void checkTrigger(){
                     hero = new Character(m.destX, m.destY, 0, DOWN, 0, 1, 0, maps[mapNo]);
                     maps[mapNo].addCharacter(hero);
                     midiEngine.play(maps[mapNo].getBgmName());
+                }
+                
+                if (event instanceof TriggerEvent) {
+                    checkTrigger();
                 }
             }
         }
