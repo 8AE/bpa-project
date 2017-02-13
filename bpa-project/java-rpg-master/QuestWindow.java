@@ -4,7 +4,6 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import java.util.List;
-
 /**
  * Created by Ahmad El-baba on 1/3/2017.
  */
@@ -12,7 +11,7 @@ public class QuestWindow implements Common {
 
     MessageEngine messageEngine;
     int currentQuest;
-    List<Quest> questList = new ArrayList();
+  List<Quest> questList = new ArrayList();
 
     // width of white border
     private static final int EDGE_WIDTH = 2;
@@ -58,43 +57,58 @@ public class QuestWindow implements Common {
 
         g.setColor(Color.BLACK);
         g.fillRect(innerRect.x, innerRect.y, innerRect.width, innerRect.height);
-
+  messageEngine.setColor(0);
         g.setColor(Color.WHITE);
         messageEngine.drawMessage(125, 96, "QUESTS", g);
         messageEngine.drawMessage(380, 96, "DESCRIPTION", g);
-        //basicly thwe line dividng quests and discriptions
+        //basicly the line dividng quests and discriptions
         g.fillRect(288, 98, 2, 350);
 
         g.drawRect(cursor.x, cursor.y + QuestSlotSpacing * questBoardSpot, cursor.width, cursor.height);
 
-        // drawing quest titles
-        if (!questList.isEmpty()) {
+        //drawing quest titles
+     if (!questList.isEmpty()) {
             for (int i = 0; i < questList.size(); i++) {
-                if (questList.get(i).isQuestFinished()) {
-                    g.setColor(Color.green);
+                try{
+                  for (int c = 0; c <13; c++) {
+               if (questList.get(i).questFinished) {
+                  
+               
+                   messageEngine.setColor(320);
+                         messageEngine.drawMessage(c*15+70, 140 + i * 40, String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
                 } else {
-                    g.setColor(Color.white);
+                    messageEngine.setColor(0);
+                         messageEngine.drawMessage(c*15+70, 140 + i * 40,String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
                 }
-                messageEngine.drawMessage(70, 140 + i * 40, questList.get(i).getQuestName(), g);
+           
+      
+               
                 
-                // why do we use questBoardSpot
+         
                 if (cursor.contains(70, 140 + i * 40)) {
+                    
                     g.setColor(Color.white);
+                      messageEngine.setColor(0);
                     messageEngine.drawMessage(300, 140, questList.get(questBoardSpot).getQuestDisctription(), g);
                     messageEngine.drawMessage(300, 410, "REWARD " + String.valueOf(questList.get(questBoardSpot).getReward()), g);
                 }
+           
+                  }    
+                }catch(Exception e){}
+        
             }
         }
+
+    
 
     }
 
     public void addQuest(Quest newQuest) {
         questList.add(newQuest);
     }
-    
-    public void setQuestList(List<Quest> quests) {
+     public void sendQuestList(List<Quest> quests, int currentQuestTransfer) {
         this.questList = quests;
-        this.currentQuest = quests.size();
+        this.currentQuest = currentQuestTransfer;
     }
 
     public void show() {
@@ -118,7 +132,6 @@ public class QuestWindow implements Common {
                 if (!isMoving) {
                     isMoving = true;
                     if (moveUp()) {
-                        if (questBoardSpot >= 0)
                         questBoardSpot--;
                     }
                 }
@@ -132,21 +145,25 @@ public class QuestWindow implements Common {
     }
 
     private boolean moveUp() {
-        if(questBoardSpot==0) {
-            questBoardSpot = currentQuest;
-        } else {
-            return (questBoardSpot > 0);
+        
+         if(questBoardSpot==0){
+         questBoardSpot = currentQuest;
+        }else{
+               return (questBoardSpot > 0);
         }
-        return(questBoardSpot == currentQuest+1);
+       return(questBoardSpot == currentQuest+1);  
+   
+        
+        
     }
 
     private boolean moveDown() {
         if(questBoardSpot==currentQuest){
-            questBoardSpot = 0;
-        } else {
-            return (questBoardSpot < currentQuest);
+         questBoardSpot = 0;
+        }else{
+           return (questBoardSpot < currentQuest);  
         }
-        return(questBoardSpot == -1);  
+       return(questBoardSpot == -1);  
     }
 
     public boolean isMoving() {

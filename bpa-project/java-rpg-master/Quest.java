@@ -1,21 +1,23 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
+import java.awt.Point;
+
 
 /**
  *
  * @author Ahmad El-baba
  */
-public class Quest{
+public class Quest {
+
     String questName;
     String questDisctription;
-    int expGained;
+    Point DXY;
+  
     String reward;
+    String questType;
+    int expGained;
     boolean questFinished;
-    
-    public Quest(){
+
+    public Quest() {
         this.questName = "Test";
         this.questDisctription = "This is a test";
         this.expGained = 0;
@@ -23,9 +25,8 @@ public class Quest{
         this.questFinished = false;
     }
 
-    // We should remove all the setter methods aside from setQuestFinished()
-    // Also, the constructor should not have quest finished since we will never create a quest finished.. they must complete it
-    public Quest(String questName, String questDescription, int expGained, String reward){
+    public Quest(String questType,String questName, String questDescription, int expGained, String reward) {
+        this.questType = questType;
         this.questName = questName;
         this.questDisctription = questDescription;
         this.expGained = expGained;
@@ -49,6 +50,24 @@ public class Quest{
         return questDisctription;
     }
 
+    public String getQuestType() {
+        return questType;
+    }
+
+    public Point getDXY() {
+        return DXY;
+    }
+
+    public void setDXY(Point DXY) {
+        this.DXY = DXY;
+    }
+
+   
+
+  
+
+ 
+
     public int getExpGained() {
         return expGained;
     }
@@ -56,9 +75,10 @@ public class Quest{
     public String getReward() {
         return reward;
     }
-    
+
     // What is this??
-    public void createQuest(String QN, String desc, int exp, String reward){
+    public void createQuest(String QT,String QN, String desc, int exp, String reward) {
+        this.questType =QT;
         this.questName = QN;
         this.questDisctription = desc;
         this.expGained = exp;
