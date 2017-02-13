@@ -491,6 +491,12 @@ public class Map implements Common {
                     // create a warp location
                     makeMoveEvent(st);
                 }
+                else if (eventType.equals("QUEST")) {
+                    makeQuestEvent(st);
+                }
+                else if (eventType.equals("TRIGGER")) {
+                    makeTriggerEvent(st);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -530,6 +536,32 @@ public class Map implements Common {
         String itemName = st.nextToken();
         TreasureEvent t = new TreasureEvent(x, y, itemName);
         events.add(t);
+    }
+     private void makeQuestEvent(StringTokenizer st) {
+        int x = Integer.parseInt(st.nextToken());
+        int y = Integer.parseInt(st.nextToken());
+        String questType = st.nextToken();
+        String questName = st.nextToken();
+         String questDisctription = st.nextToken();
+          int expGained = Integer.parseInt(st.nextToken());
+           String reward = st.nextToken();
+              int DX = Integer.parseInt(st.nextToken());
+                 int DY = Integer.parseInt(st.nextToken());
+        QuestEvent s = new QuestEvent(x, y,questType, questName,questDisctription,expGained,reward,DX,DY);
+        events.add(s);
+    }
+
+    private void makeDoorEvent(StringTokenizer st) {
+        int x = Integer.parseInt(st.nextToken());
+        int y = Integer.parseInt(st.nextToken());
+        DoorEvent d = new DoorEvent(x, y);
+        events.add(d);
+    }
+    private void makeTriggerEvent(StringTokenizer st) {
+        int x = Integer.parseInt(st.nextToken());
+        int y = Integer.parseInt(st.nextToken());
+        TriggerEvent tr = new TriggerEvent(x, y);
+        events.add(tr);
     }
 
     private void makeDoorEvent(StringTokenizer st) {
