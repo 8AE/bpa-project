@@ -80,9 +80,12 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     // The engines for the sounds are declared and initialized.
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
+    
+    private QuestEngine questEngine;
 
     // Quests
     int currentQuest = 0;
+      private List<Quest> questList = new ArrayList();
     // creating quest sample  createQuest(questList[currentQuest], "TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
     
     // BGM
@@ -144,6 +147,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         // Create quest window.
         questWindow = new QuestWindow(QUE_RECT);
+        questEngine = new QuestEngine();
 
         // Create HUD.
         hudWindow = new HudWindow();
@@ -264,6 +268,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         messageWindow.draw(dbg);
         
         // Draw message window.
+         popup.draw(dbg);
+        
         inventoryWindow.draw(dbg);
         
         // Draw quest window.
@@ -309,7 +315,16 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             g.dispose();
         }
     }
-    
+      private void createQuest(String QT,String QN, String desc, int exp, String reward) {
+
+        questList.add(new Quest(QT,QN, desc, exp, reward));
+        questWindow.sendQuestList(questList, currentQuest);
+     
+
+    }
+    private void currentQuestSlotUpgrade(){
+        currentQuest++;
+    }
     private void mainWindowCheckInput() {
         // The hero is moved left if there are no obsticles in the way.
         if (leftKey.isPressed()) {
@@ -341,7 +356,17 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         }
         // An action is performed if there are object events in front of or under the hero, depending on the case.
         if (enterKey.isPressed()) {
-            
+             if (questEvent != null) {
+               // waveEngine.play("treasure");
+                  messageWindow.setMessage("HERO FOUND/" + questEvent.getQuestName());
+                messageWindow.show();
+       
+              createQuest(questEvent.getQuestType(),questEvent.getQuestName(), questEvent.getQuestDisctription(), questEvent.getExp(), questEvent.getReward());
+                    questEngine.chooseType(questList.get(currentQuest),questEvent);//This sets The Points 
+               currentQuestSlotUpgrade();
+                maps[mapNo].removeEvent(questEvent);
+                return;
+            }
             // Door is opened if there is one in front of the hero.
             DoorEvent door = hero.open();
             if (door != null) {
@@ -422,7 +447,34 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             maps[mapNo].addAttack(attack);
         }
     }
-
+private void checkTrigger(){
+      TriggerEvent trigger = hero.touch();
+      
+    try{
+  
+     
+       for (int t = 0; t <trigger.gettLocation().size(); t++) {  
+       for (int i = 0; i < questList.size(); i++) {
+            if (trigger.getPoint(t).equals(questList.get(i).DXY)) {
+     
+            
+              popup.setMessage("QUEST COMPLETE");
+              popup.show();
+             questList.get(i).setQuestFinished(true);
+             
+                maps[mapNo].removeEvent(trigger);
+                return;  
+                
+                
+            } 
+       }
+       }
+            
+    }catch(Exception e){
+        System.out.println(e);
+    }
+     
+}
     private void messageWindowCheckInput() {
         // Moves to the next page or exits the text box if there is no text left.
         if (enterKey.isPressed()) {
