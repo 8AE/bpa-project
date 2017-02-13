@@ -10,6 +10,9 @@ public class ActionKey {
     // isPressed() method returns true while key is pressed, but loops it at a slower rate
     public static final int SLOWER_INPUT = 2;
     
+    // When the hero has died, no input will be taken
+    public static final int DEAD_INPUT = 3;
+    
     // constants key state
     private static final int STATE_RELEASED = 0;
     private static final int STATE_PRESSED = 1;
@@ -46,6 +49,10 @@ public class ActionKey {
     }
 
     public void press() {
+        if (mode == DEAD_INPUT) {
+            return;
+        }
+        
         if (state != STATE_WAITING_FOR_RELEASE) {
             amount++;
             state = STATE_PRESSED;
@@ -63,6 +70,10 @@ public class ActionKey {
     }
 
     public void release() {
+        if (mode == DEAD_INPUT) {
+            return;
+        }
+        
         state = STATE_RELEASED;
         if (mode == SLOWER_INPUT) {
             threadSlower.stop();

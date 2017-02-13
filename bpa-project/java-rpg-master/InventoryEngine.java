@@ -30,20 +30,22 @@ public class InventoryEngine implements Common{
         createHash();
     }
 
-    public void drawItem(int x, int y, int i, Graphics g) {
-        Point pos = itemPos.get(new Integer(i));
-        if (pos == null) {
-            return;
-        }
-        g.drawImage(itemsImage,
-                x,
-                y,
-                (int)((x + ITEM_WIDTH * ITEM_SCALE) - 2),
-                (int)((y + ITEM_HEIGHT * ITEM_SCALE) - 2),
-                pos.x,
-                pos.y,
-                pos.x + ITEM_WIDTH,
-                pos.y + ITEM_HEIGHT, null);
+    public void drawItem(int x, int y, Item item, Graphics g) {
+        if (item != null) {
+            Point pos = itemPos.get(new Integer(item.getId()));
+            if (pos == null) {
+                return;
+            }
+            g.drawImage(itemsImage,
+                    x,
+                    y,
+                    (int)((x + ITEM_WIDTH * ITEM_SCALE) - 2),
+                    (int)((y + ITEM_HEIGHT * ITEM_SCALE) - 2),
+                    pos.x,
+                    pos.y,
+                    pos.x + ITEM_WIDTH,
+                    pos.y + ITEM_HEIGHT, null);
+            }
     }
 
     private void createHash() {

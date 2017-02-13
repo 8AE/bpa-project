@@ -24,14 +24,15 @@ class Attack implements Common {
     private int px, py;
     // attack's direction (LEFT, RIGHT, UP, or DOWN)
     private int direction;
-    // attack's movement position
-    private int my, mx;
     
     // the attack's weapon
     private Weapon weapon;
     
     // the attack's map
     private Map map;
+    
+    // the character the attack is from
+    private Character character;
     
     // weapon's chipset id
     private int id = 5;
@@ -41,7 +42,7 @@ class Attack implements Common {
     // thread for attack animation
     private Thread threadAnimation;
     
-    public Attack(int x, int y, int direction, Weapon weapon, Map map) {
+    public Attack(int x, int y, int direction, Weapon weapon, Character character, Map map) {
         
         this.x = x;
         this.y = y;
@@ -50,6 +51,7 @@ class Attack implements Common {
         this.direction = direction;
         this.weapon = weapon;
         this.map = map;
+        this.character = character;
         
         // the weaponchip is loaded if it has not already
         if (image == null) {
@@ -99,6 +101,10 @@ class Attack implements Common {
         return py;
     }
     
+    public Character getCharacter() {
+        return character;
+    }
+    
     public Weapon getWeapon() {
         return weapon;
     }
@@ -108,7 +114,7 @@ class Attack implements Common {
         return attackBox;
     }
     
-    private void removeAttack() {
+    public void removeAttack() {
         map.removeAttack(this);
     }
     
@@ -122,7 +128,7 @@ class Attack implements Common {
     
     private class AttackAnimationThread extends Thread {
         public void run() {
-            for (int i = 0; i < 2; i++) { //weapon.getRange() * (CS/PROJECTILE_SPEED
+            for (int i = 0; i < weapon.getRange() * (CS/PROJECTILE_SPEED); i++) {
                 switch (direction) {
                     case UP:
                         py-=PROJECTILE_SPEED;

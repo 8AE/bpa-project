@@ -11,7 +11,6 @@ public class MessageWindow {
     private static final int MAX_CHAR_PER_LINE = 20;
     private static final int MAX_LINE_PER_PAGE = 3;
     private static final int MAX_CHAR_PER_PAGE = MAX_CHAR_PER_LINE * MAX_LINE_PER_PAGE;
-    private static final int CHAR_FOR_TAB = 5;
 
     // outer frame
     private Rectangle rect;
@@ -32,12 +31,6 @@ public class MessageWindow {
     private int curPage = 0;
     private int curPos;
     private boolean nextFlag = false;
-    public static boolean selectFlag = false;
-    private int selectLine = 0;
-    public static int selectOption = 0;
-    public static String commandOption1 = "";
-    public static String commandOption2 = "";
-    public static String commandVariable = "";
     
     private MessageEngine messageEngine;
 
@@ -95,122 +88,44 @@ public class MessageWindow {
             int dy = textRect.y + (LINE_HEIGHT + MessageEngine.FONT_HEIGHT) * 3;
             g.drawImage(cursorImage, dx, dy, null);
         }
-        
-        // draw a cursor to select an option if one is given
-        if (selectFlag) {
-            int dx = textRect.x + selectOption*MessageEngine.FONT_WIDTH * 9;
-            int dy = textRect.y + MessageEngine.FONT_HEIGHT + LINE_HEIGHT;
-            g.drawImage(cursorImage, dx, dy, null);
-        }
     }
 
     public void setMessage(String msg) {
         curPos = 0;
         curPage = 0;
         nextFlag = false;
-        selectFlag = false;
-        selectLine = 0;
-        selectOption = 0;
 
+        System.out.println(msg);
+        
         // initialize
         for (int i=0; i<text.length; i++) {
             text[i] = ' ';
         }
         
-        boolean isText = true;
-        boolean isCommand = false;
-        String selection = "";
-        int firstSelectionWordLength = 0;
-        
         int p = 0;  // current position
         for (int i = 0; i < msg.length(); i++) {
             char c = msg.charAt(i);
-            if (c == '/') {         // new line
-                p += MAX_CHAR_PER_LINE;
-                p = (p / MAX_CHAR_PER_LINE) * MAX_CHAR_PER_LINE;
-            } else if (c == '|') {  // new page
-                p += MAX_CHAR_PER_PAGE;
-                p = (p / MAX_CHAR_PER_PAGE) * MAX_CHAR_PER_PAGE;
-            } else if (c == 't') {
-                p += CHAR_FOR_TAB;
-            } else if (c == '(') {
-                text[p++] = ' ';
-                isText = false;
-            } else if (c == ';') {
-                for (int j = 0; j < selection.length(); j++) {
-                    text[p++] = selection.charAt(j);
-                }
-                for (int j = 0; j < 9 - firstSelectionWordLength; j++) {
-                    text[p++] = ' ';
-                }
-                selection = "";
-            } else if (c == ')') {
-                for (int j = 0; j < selection.length(); j++) {
-                    text[p++] = selection.charAt(j);
-                }
-                selection = "";
-                selectFlag = true;
-                isText = true;
-            } else if (c == '[') {
-                isText = false;
-                isCommand = true;
-            } else if (c == ']') { 
-                commandOption1 = selection;
-                selection = "";
-                isText = true;
-                isCommand = false;
-            } else if (c == '<') {
-                isText = false;
-                isCommand = true;
-            } else if (c == '>') { 
-                commandOption2 = selection;
-                selection = "";
-                isText = true;
-                isCommand = false;
-            } else if (c == ':') { 
-                i++;
-                while (msg.charAt(i) != '>' && msg.charAt(i) != ']') {
-                    commandVariable+=msg.charAt(i);
-                    i++;
-                }
-                i--;
-            } else if (isText) {
-                text[p++] = c;
-            } else {
-                firstSelectionWordLength++;
-                selection+=c;
+            switch (c) {
+                case '/':
+                    // new line
+                    p += MAX_CHAR_PER_LINE;
+                    p = (p / MAX_CHAR_PER_LINE) * MAX_CHAR_PER_LINE;
+                    break;
+                case '|':
+                    // new page
+                    p += MAX_CHAR_PER_PAGE; 
+                    p = (p / MAX_CHAR_PER_PAGE) * MAX_CHAR_PER_PAGE;
+                    break;
+                default:
+                    text[p++] = c;
+                    break;
             }
         }
-        
-        System.out.println(commandVariable);
         
         maxPage = p / MAX_CHAR_PER_PAGE;
 
         task = new FlowingMessageTask();
         timer.schedule(task, 0L, 20L);
-    }
-
-    public boolean isCommand() {
-        return selectFlag;
-    }
-    
-    public void checkCommand(Character c) {
-        System.out.println(c.getMessage());
-        if (commandString().equalsIgnoreCase("hi")) {
-            c.setMessage(commandVariable);
-            System.out.println(c.getMessage());
-        } else if (commandString().equalsIgnoreCase("bye")) {
-            System.out.println("bye");
-        }
-    }
-    
-    public String commandString() {
-        if (selectOption == 0) {
-            return commandOption1;
-        } else if (selectOption == 1) {
-            return commandOption2;
-        }
-        return null;
     }
     
     public boolean nextPage() {
@@ -230,21 +145,13 @@ public class MessageWindow {
     public void show() {
         isVisible = true;
     }
-
+    
     public void hide() {
         isVisible = false;
     }
 
     public boolean isVisible() {
         return isVisible;
-    }
-    
-    public void cursorLeft() {
-        selectOption = 0;
-    }
-    
-    public void cursorRight() {
-        selectOption = 1;
     }
 
     class FlowingMessageTask extends TimerTask {

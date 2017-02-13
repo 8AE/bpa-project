@@ -25,6 +25,10 @@ public class TreasureEvent extends Event {
         dict.put("SOMETHING", 2);
         dict.put("YEAH", 3);
 
-        return (Integer) dict.get(super.toString());
+        return (Integer) dict.get(itemName);
+    }
+    
+    public Item toItem() {
+        return new Item("ITEM", "ITEM DESC", 2);
     }
 }

@@ -114,6 +114,8 @@ public class MessageEngine {
         characterPos.put(new Character('X'), new Point(48, 418));
         characterPos.put(new Character('Y'), new Point(64, 418));
         characterPos.put(new Character('Z'), new Point(80, 418));
+        
+        // Punctuation
         characterPos.put(new Character('!'), new Point(96, 418));
         characterPos.put(new Character('?'), new Point(112, 418));
         characterPos.put(new Character(' '),  new Point(64, 198));
