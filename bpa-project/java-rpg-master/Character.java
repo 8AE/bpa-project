@@ -487,6 +487,41 @@ public class Character implements Common {
         }
         return null;
     }
+       public TriggerEvent touch() {
+       
+        Event event = map.checkEvent(x, y);
+        if (event instanceof TriggerEvent) {
+            return (TriggerEvent) event;
+        }
+        return null;
+    }
+    public QuestEvent questSearch() {
+             int nextX = 0;
+        int nextY = 0;
+        switch (direction) {
+            case LEFT:
+                nextX = x - 1;
+                nextY = y;
+                break;
+            case RIGHT:
+                nextX = x + 1;
+                nextY = y;
+                break;
+            case UP:
+                nextX = x;
+                nextY = y - 1;
+                break;
+            case DOWN:
+                nextX = x;
+                nextY = y + 1;
+                break;
+        }
+        Event event = map.checkEvent(nextX, nextY);
+        if (event instanceof QuestEvent) {
+            return (QuestEvent) event;
+        }
+        return null;
+    }
 
     /**
      * Check if there is a door in front of the hero.
