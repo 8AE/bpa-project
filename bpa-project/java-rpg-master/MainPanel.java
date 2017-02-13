@@ -73,6 +73,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     private QuestWindow questWindow;
     private static Rectangle QUE_RECT = new Rectangle(64, 96, 512, 352);
     
+    //Draws the popup
+    private NotificationPopup popup;
+    private static Rectangle POP_RECT = new Rectangle(300, 96, 250, 45);
+    
+    
     // The window for the Heads Up Display at the top of the screen.
     // This is refered to as the HUD throughout the code.
     private HudWindow hudWindow;
