@@ -10,7 +10,8 @@ import java.util.List;
 public class QuestWindow implements Common {
 
     MessageEngine messageEngine;
-    int currentQuest;
+    QuestEngine questEngine;
+    
     List<Quest> questList = new ArrayList();
 
     // width of white border
@@ -34,6 +35,7 @@ public class QuestWindow implements Common {
 
     public QuestWindow(Rectangle rect) {
         messageEngine = new MessageEngine();
+        questEngine = new QuestEngine();
         cursor = new Rectangle(70, 138, 214, 28);
         this.boarder = rect;
         innerRect = new Rectangle(
@@ -103,12 +105,17 @@ public class QuestWindow implements Common {
         threadAnimation.start();
     }
 
-    public void addQuest(Quest newQuest) {
-        questList.add(newQuest);
+    public void addQuest(QuestEvent questEvent) {
+        questList.add(new Quest(questEvent.getQuestType(),questEvent.getQuestName(), questEvent.getQuestDisctription(), questEvent.getExp(), questEvent.getReward()));
+        questEngine.chooseType(questList.get(questList.size() - 1), questEvent);
     }
-     public void sendQuestList(List<Quest> quests, int currentQuestTransfer) {
+    
+    public List<Quest> getQuests() {
+        return questList;
+    }
+    
+     public void sendQuestList(List<Quest> quests) {
         this.questList = quests;
-        this.currentQuest = currentQuestTransfer;
     }
 
     public void show() {
@@ -139,7 +146,11 @@ public class QuestWindow implements Common {
                         //waveEngine.play("beep");
                         questBoardSpot--;
                     } else {
-                        questBoardSpot = questList.size() - 1;
+                        if (questList.size() == 0) {
+                        questBoardSpot = questList.size();
+                        } else {
+                            questBoardSpot = questList.size() - 1;
+                        }
                         //waveEngine.play("boop");
                     }
                 }
@@ -157,7 +168,7 @@ public class QuestWindow implements Common {
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveDown() {
-        return (questBoardSpot <= currentQuest);
+        return (questBoardSpot < questList.size() - 1);
     }
     
     /**

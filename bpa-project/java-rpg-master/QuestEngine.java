@@ -23,19 +23,12 @@ public QuestEngine(){
         switch(quest.getQuestType()){
             case "OBJECTIVE":
                 quest.setDXY(questEvent.getDXY());
-               
-                
-                
                 break;
             case "Collective":
-                
-                
-                
                 break;
             case "Elimination":
-                
-                
-                
+                break;
+            default:
                 break;
         }
         

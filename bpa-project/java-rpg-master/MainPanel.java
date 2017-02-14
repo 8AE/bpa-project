@@ -99,16 +99,14 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     // The engines for the sounds are declared and initialized.
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
-    private QuestEngine questEngine = new QuestEngine();
 
     // Quests
-    int currentQuest = 0;
-    private List<Quest> questList = new ArrayList();
+    //   private List<Quest> questList = new ArrayList();
     // creating quest sample  createQuest(questList[currentQuest], "TEST", "TEST DISCRIPTON", 10, "HOLY SWORD");
     
     // BGM
     // from TAM Music Factory http://www.tam-music.com/
-    private static final String[] bgmNames = {"castle", "field"};
+    private static final String[] bgmNames = {"castle", "field", "theme"};
     // Sound Clip
     private static final String[] soundNames = {"treasure", "door", "step", "beep"};
 
@@ -144,7 +142,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         // Create maps.
         maps = new Map[3];
-        maps[0] = new Map("map/castle.map", "event/castle.evt", "castle", this);
+        maps[0] = new Map("map/castle.map", "event/castle.evt", "theme", this);
         maps[1] = new Map("map/field.map", "event/field.evt", "field", this);
         maps[2] = new Map("map/map.map", "event/map.evt", "field", this);
         mapNo = 0;  // initial map
@@ -348,16 +346,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             g.dispose();
         }
     }
-      private void createQuest(String QT,String QN, String desc, int exp, String reward) {
-
-        questList.add(new Quest(QT,QN, desc, exp, reward));
-        questWindow.sendQuestList(questList, currentQuest);
-     
-
-    }
-    private void currentQuestSlotUpgrade(){
-        currentQuest++;
-    }
+      
     private void mainWindowCheckInput() {
         // The hero is moved left if there are no obsticles in the way.
         if (leftKey.isPressed()) {
@@ -398,9 +387,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                   messageWindow.setMessage("HERO FOUND/" + questEvent.getQuestName());
                 messageWindow.show();
        
-              createQuest(questEvent.getQuestType(),questEvent.getQuestName(), questEvent.getQuestDisctription(), questEvent.getExp(), questEvent.getReward());
-                    questEngine.chooseType(questList.get(currentQuest),questEvent);//This sets The Points 
-               currentQuestSlotUpgrade();
+                questWindow.addQuest(questEvent);
                 maps[mapNo].removeEvent(questEvent);
                 return;
             }
@@ -487,17 +474,20 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     }
     
     private void checkTrigger() {
+           
         TriggerEvent trigger = hero.touch();
         try{
-            for (int t = 0; t <trigger.gettLocation().size(); t++) {  
-                for (int i = 0; i < questList.size(); i++) {
-                    if (trigger.getPoint(t).equals(questList.get(i).DXY)) {
+             
+            for (int t = 0; t <=trigger.gettLocation().size(); t++) {  
+        
+                for (int i = 0; i <= questWindow.getQuests().size(); i++) {
+                    if (trigger.getPoint(t).equals(questWindow.getQuests().get(i).getDXY())) {
                         popup.setMessage("QUEST COMPLETE");
                         popup.show();
-                        questList.get(i).setQuestFinished(true);
+                        questWindow.getQuests().get(i).setQuestFinished(true);
                             maps[mapNo].removeEvent(trigger);
                             return;  
-                    } 
+                    }
                 }
             }
         } catch(Exception e){
@@ -720,7 +710,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             out.writeObject(hero);
             out.writeObject(maps);
             out.writeInt(mapNo);
-            out.writeObject(questList);
+            out.writeObject(questWindow.getQuests());
             out.flush(); 
             out.close();
             
@@ -748,8 +738,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 map.runCharacterThread();
             }
             
-            questList = (List<Quest>) in.readObject();
-            questWindow.sendQuestList(questList, currentQuest);
+            questWindow.sendQuestList((List<Quest>) in.readObject());
             
             questWindow.runThread();
             inventoryWindow.runThread();

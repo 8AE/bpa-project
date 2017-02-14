@@ -17,7 +17,7 @@ import java.util.List;
 public class TriggerEvent extends Event implements Serializable{
     private List<Point> tLocation;
     public TriggerEvent(int x, int y) {
-        super(x, y, 24, false);
+        super(x, y, 7, false);
              tLocation = new ArrayList();
              tLocation.add(new Point(x, y));
 
