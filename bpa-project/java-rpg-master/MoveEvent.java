@@ -1,4 +1,6 @@
-public class MoveEvent extends Event {
+import java.io.Serializable;
+
+public class MoveEvent extends Event implements Serializable {
     public int destMapNo;
     public int destX;
     public int destY;

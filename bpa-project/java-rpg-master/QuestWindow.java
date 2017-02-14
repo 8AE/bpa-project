@@ -11,7 +11,7 @@ public class QuestWindow implements Common {
 
     MessageEngine messageEngine;
     int currentQuest;
-  List<Quest> questList = new ArrayList();
+    List<Quest> questList = new ArrayList();
 
     // width of white border
     private static final int EDGE_WIDTH = 2;
@@ -20,10 +20,9 @@ public class QuestWindow implements Common {
     private int questBoardSpot = 0;
     private boolean isMoving;
 
-    private int moveLength;
-    private int QuestSlotSpacing = 40;
+    private final int QUEST_SLOT_SPACING = 40;
 
-    private Thread threadAnime;
+    private Thread threadAnimation;
 
     // outer frame
     private Rectangle boarder;
@@ -44,8 +43,8 @@ public class QuestWindow implements Common {
                 rect.height - EDGE_WIDTH * 2);
 
         // run thread
-        threadAnime = new Thread(new QuestWindow.AnimationThread());
-        threadAnime.start();
+        threadAnimation = new Thread(new QuestWindow.AnimationThread());
+        threadAnimation.start();
     }
 
     public void draw(Graphics g) {
@@ -57,27 +56,27 @@ public class QuestWindow implements Common {
 
         g.setColor(Color.BLACK);
         g.fillRect(innerRect.x, innerRect.y, innerRect.width, innerRect.height);
-  messageEngine.setColor(0);
+        messageEngine.setColor(messageEngine.WHITE);
         g.setColor(Color.WHITE);
         messageEngine.drawMessage(125, 96, "QUESTS", g);
         messageEngine.drawMessage(380, 96, "DESCRIPTION", g);
-        //basicly the line dividng quests and discriptions
+        // the line dividng quests and discriptions
         g.fillRect(288, 98, 2, 350);
 
-        g.drawRect(cursor.x, cursor.y + QuestSlotSpacing * questBoardSpot, cursor.width, cursor.height);
+        g.drawRect(cursor.x, cursor.y + QUEST_SLOT_SPACING * questBoardSpot, cursor.width, cursor.height);
 
-        //drawing quest titles
-     if (!questList.isEmpty()) {
+        // drawing quest titles
+        if (!questList.isEmpty()) {
             for (int i = 0; i < questList.size(); i++) {
                 try{
                   for (int c = 0; c <13; c++) {
                if (questList.get(i).questFinished) {
                   
                
-                   messageEngine.setColor(320);
+                   messageEngine.setColor(messageEngine.GREEN);
                          messageEngine.drawMessage(c*15+70, 140 + i * 40, String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
                 } else {
-                    messageEngine.setColor(0);
+                    messageEngine.setColor(messageEngine.WHITE);
                          messageEngine.drawMessage(c*15+70, 140 + i * 40,String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
                 }
            
@@ -88,19 +87,20 @@ public class QuestWindow implements Common {
                 if (cursor.contains(70, 140 + i * 40)) {
                     
                     g.setColor(Color.white);
-                      messageEngine.setColor(0);
+                      messageEngine.setColor(messageEngine.WHITE);
                     messageEngine.drawMessage(300, 140, questList.get(questBoardSpot).getQuestDisctription(), g);
                     messageEngine.drawMessage(300, 410, "REWARD " + String.valueOf(questList.get(questBoardSpot).getReward()), g);
-                }
-           
+                }   
                   }    
-                }catch(Exception e){}
-        
+                } catch(Exception e){}
             }
         }
-
+    }
     
-
+    public void runThread() {
+        // run thread
+        threadAnimation = new Thread(new QuestWindow.AnimationThread());
+        threadAnimation.start();
     }
 
     public void addQuest(Quest newQuest) {
@@ -122,8 +122,12 @@ public class QuestWindow implements Common {
             case DOWN:
                 if (!isMoving) {
                     isMoving = true;
-                    if (moveDown()) {
+                    if (canMoveDown()) {
+                        //waveEngine.play("beep");
                         questBoardSpot++;
+                    } else {
+                        questBoardSpot = 0;
+                        //waveEngine.play("boop");
                     }
                 }
                 isMoving = false;
@@ -131,8 +135,12 @@ public class QuestWindow implements Common {
             case UP:
                 if (!isMoving) {
                     isMoving = true;
-                    if (moveUp()) {
+                    if (canMoveUp()) {
+                        //waveEngine.play("beep");
                         questBoardSpot--;
+                    } else {
+                        questBoardSpot = questList.size() - 1;
+                        //waveEngine.play("boop");
                     }
                 }
                 isMoving = false;
@@ -143,27 +151,21 @@ public class QuestWindow implements Common {
     public void hide() {
         isVisible = false;
     }
-
-    private boolean moveUp() {
-        
-         if(questBoardSpot==0){
-         questBoardSpot = currentQuest;
-        }else{
-               return (questBoardSpot > 0);
-        }
-       return(questBoardSpot == currentQuest+1);  
-   
-        
-        
+    
+    /**
+     * Checks if the cursor can move down by checking if the position is below the column count.
+     * @return whether or not the cursor can move down.
+     */
+    private boolean canMoveDown() {
+        return (questBoardSpot <= currentQuest);
     }
-
-    private boolean moveDown() {
-        if(questBoardSpot==currentQuest){
-         questBoardSpot = 0;
-        }else{
-           return (questBoardSpot < currentQuest);  
-        }
-       return(questBoardSpot == -1);  
+    
+    /**
+     * Checks if the cursor can move down by checking if the position is below the column count.
+     * @return whether or not the cursor can move down.
+     */
+    private boolean canMoveUp() {
+        return (questBoardSpot > 0);
     }
 
     public boolean isMoving() {
@@ -176,7 +178,6 @@ public class QuestWindow implements Common {
 
     public void setMoving(boolean flag) {
         isMoving = flag;
-        moveLength = 0;
     }
 
     public int getQuestBoardPos() {

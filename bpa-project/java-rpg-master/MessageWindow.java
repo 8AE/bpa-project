@@ -1,9 +1,10 @@
 import java.awt.*;
+import java.io.Serializable;
 import javax.swing.*;
 import java.util.*;
 import java.util.Timer;
 
-public class MessageWindow {
+public class MessageWindow implements Serializable {
     // width of white border
     private static final int EDGE_WIDTH = 2;
 
@@ -89,6 +90,10 @@ public class MessageWindow {
             g.drawImage(cursorImage, dx, dy, null);
         }
     }
+    
+    public void runThread() {
+        
+    }
 
     public void setMessage(String msg) {
         curPos = 0;
@@ -154,7 +159,7 @@ public class MessageWindow {
         return isVisible;
     }
 
-    class FlowingMessageTask extends TimerTask {
+    class FlowingMessageTask extends TimerTask implements Serializable {
         public void run() {
             if (!nextFlag) {
                 curPos++;

@@ -1,6 +1,7 @@
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
+import java.io.Serializable;
 import java.lang.Character;
 import java.util.HashMap;
 
@@ -8,7 +9,7 @@ import javax.swing.ImageIcon;
 
 // in this class, Character does not mean Player!
 
-public class MessageEngine {
+public class MessageEngine implements Serializable {
     // font size
     public static final int FONT_WIDTH = 16;
     public static final int FONT_HEIGHT = 22;

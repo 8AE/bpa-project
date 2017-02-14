@@ -1,7 +1,8 @@
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.*;
 
-public class QuestEvent extends Event {
+public class QuestEvent extends Event implements Serializable {
       private String questType;
     private String questName;
     private String questDisctription;

@@ -4,7 +4,7 @@ import java.util.*;
 import java.awt.image.*;
 import javax.imageio.*;
 
-public class Map implements Common {
+public class Map implements Common, Serializable {
     // map data
     private int[][] map;
 
@@ -34,7 +34,7 @@ public class Map implements Common {
     private MainPanel panel;
 
     // the thread to monitor the attacks on characters
-    private Thread threadDamage;
+    private transient Thread threadDamage;
     
     // the map file location and the background music location
     private String mapFile;
@@ -192,6 +192,24 @@ public class Map implements Common {
         return false;
     }
 
+    public void runThread() {
+        // run damage thread
+        threadDamage = new Thread(new Map.AttackDamageThread());
+        threadDamage.start();
+    }
+    
+    public void runAttackThread() {
+        for (Attack attack : attacks) {
+            attack.runThread();
+        }
+    }
+    
+    public void runCharacterThread() {
+        for (Character character : characters) {
+            character.runThread();
+        }
+    }
+    
     /**
      * Add a Character to this map.
      * @param c a Character to add to this map.
@@ -496,6 +514,8 @@ public class Map implements Common {
                 }
                 else if (eventType.equals("TRIGGER")) {
                     makeTriggerEvent(st);
+                } else if (eventType.equals("SAVE")) {
+                    makeSaveEvent(st);
                 }
             }
         } catch (Exception e) {
@@ -537,7 +557,8 @@ public class Map implements Common {
         TreasureEvent t = new TreasureEvent(x, y, itemName);
         events.add(t);
     }
-     private void makeQuestEvent(StringTokenizer st) {
+    
+    private void makeQuestEvent(StringTokenizer st) {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
         String questType = st.nextToken();
@@ -557,18 +578,12 @@ public class Map implements Common {
         DoorEvent d = new DoorEvent(x, y);
         events.add(d);
     }
+    
     private void makeTriggerEvent(StringTokenizer st) {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
         TriggerEvent tr = new TriggerEvent(x, y);
         events.add(tr);
-    }
-
-    private void makeDoorEvent(StringTokenizer st) {
-        int x = Integer.parseInt(st.nextToken());
-        int y = Integer.parseInt(st.nextToken());
-        DoorEvent d = new DoorEvent(x, y);
-        events.add(d);
     }
 
     private void makeMoveEvent(StringTokenizer st) {
@@ -580,6 +595,13 @@ public class Map implements Common {
         int destY = Integer.parseInt(st.nextToken());
         MoveEvent m = new MoveEvent(x, y, chipNo, destMapNo, destX, destY);
         events.add(m);
+    }
+    
+    private void makeSaveEvent(StringTokenizer st) {
+        int x = Integer.parseInt(st.nextToken());
+        int y = Integer.parseInt(st.nextToken());
+        SaveEvent s = new SaveEvent(x, y);
+        events.add(s);
     }
 
     public void show() {
@@ -598,10 +620,9 @@ public class Map implements Common {
             g.setColor(Color.RED);
             g.fillRect(healthBar.x + c.getPX()- offsetX, healthBar.y + c.getPY() - offsetY, (int) (healthBar.width * c.getHealthProportions()), healthBar.height);
         }
-        
     }
     
-    private class AttackDamageThread extends Thread {
+    private class AttackDamageThread extends Thread implements Serializable {
         public void run() {
             while (true) {
                 attack:

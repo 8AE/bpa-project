@@ -1,5 +1,5 @@
-
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
  *
  * @author Ahmad 2/8/17
  */
-public class TriggerEvent extends Event{
+public class TriggerEvent extends Event implements Serializable{
     private List<Point> tLocation;
     public TriggerEvent(int x, int y) {
         super(x, y, 24, false);

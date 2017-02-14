@@ -1,12 +1,13 @@
 
 import java.awt.Point;
+import java.io.Serializable;
 
 
 /**
  *
  * @author Ahmad El-baba
  */
-public class Quest {
+public class Quest implements Serializable {
 
     String questName;
     String questDisctription;

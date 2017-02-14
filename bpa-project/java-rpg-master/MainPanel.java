@@ -12,7 +12,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,6 +29,8 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionListener {
+    
+    private static final Logger LOGGER = Logger.getLogger( MainPanel.class.getName() );
     
     // The dimension of the game's panel.
     public static final int WIDTH = 640;
@@ -42,6 +49,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     // our hero!
     private Character hero;
+    
+    // is this the main menu?
+    private boolean isMainMenu = true;
+    // which selection of the main menu the cursor is on
+    private int mainMenuSelection = 0;
     
     // action keys
     private ActionKey leftKey;
@@ -87,7 +99,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     // The engines for the sounds are declared and initialized.
     private MidiEngine midiEngine = new MidiEngine();
     private WaveEngine waveEngine = new WaveEngine();
-    private QuestEngine questEngine;
+    private QuestEngine questEngine = new QuestEngine();
 
     // Quests
     int currentQuest = 0;
@@ -120,10 +132,10 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         addKeyListener(this);
 
         // Create action keys.
-        leftKey = new ActionKey();
-        rightKey = new ActionKey();
-        upKey = new ActionKey();
-        downKey = new ActionKey();
+        leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
+        rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
+        upKey = new ActionKey(ActionKey.SLOWER_INPUT);
+        downKey = new ActionKey(ActionKey.SLOWER_INPUT);
         tabKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         inventoryKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
@@ -153,7 +165,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         // Create quest window.
         questWindow = new QuestWindow(QUE_RECT);
-        questEngine = new QuestEngine();
 
         // Create HUD.
         hudWindow = new HudWindow();
@@ -180,6 +191,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         beforeTime = System.currentTimeMillis();
         while (true) {
+            
             checkInput();
             gameUpdate();
             gameRender();
@@ -196,7 +208,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             try {
                 Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.SEVERE, e.toString(), e);
             }
 
             beforeTime = System.currentTimeMillis();
@@ -209,7 +221,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
            If they are not visable, the main window is useable.
            If any are visable, their input is checked.
            They are organized in a hierarchy of priority with the message window on top. */
-        if (messageWindow.isVisible()) {
+        if (isMainMenu) {
+            mainMenuCheckInput();
+        } else if (messageWindow.isVisible()) {
             messageWindowCheckInput();
         } else if (inventoryWindow.isVisible()) {
             inventoryWindowCheckInput();
@@ -222,7 +236,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     private void gameUpdate() {
         // If only the main panel is visable, then the activities that reside within it function.
-        if (!messageWindow.isVisible() && !inventoryWindow.isVisible() && !questWindow.isVisible()) {
+        if (!messageWindow.isVisible() && !inventoryWindow.isVisible() && !questWindow.isVisible() && !isMainMenu) {
             heroMove();
             characterMove();
             characterAttack();
@@ -249,54 +263,64 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         // The default background is set to black.
         dbg.setColor(Color.BLACK);
         dbg.fillRect(0, 0, WIDTH, HEIGHT);
-
-        // Calculate offset so that the hero is in the center of a screen.
-        int offsetX = hero.getPX() - MainPanel.WIDTH / 2;
-        // Character does not scroll at the edge of the map on the X-axis.
-        if (offsetX < 0) {
-            offsetX = 0;
-        } else if (offsetX > maps[mapNo].getWidth() - MainPanel.WIDTH) {
-            offsetX = maps[mapNo].getWidth() - MainPanel.WIDTH;
-        }
-
-        int offsetY = hero.getPY() - MainPanel.HEIGHT / 2;
-        // Character does not scroll at the edge of the map on the Y-axis.
-        if (offsetY < 0) {
-            offsetY = 0;
-        } else if (offsetY > maps[mapNo].getHeight() - MainPanel.HEIGHT) {
-            offsetY = maps[mapNo].getHeight() - MainPanel.HEIGHT;
-        }
         
-        // Draw current map.
-        maps[mapNo].draw(dbg, offsetX, offsetY);
-        
-        // Draw HUD window.
-        hudWindow.draw(dbg);
-        
-        // Draw message window.
-        messageWindow.draw(dbg);
-        
-        // Draw message window.
-        popup.draw(dbg);
-        
-        inventoryWindow.draw(dbg);
-        
-        // Draw quest window.
-        questWindow.draw(dbg);
-        
-        if (isGameOver) {
-
-            try {
-                gameOver = ImageIO.read(getClass().getResource("image/gameover.png"));
-            } catch (IOException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+        if (isMainMenu) {
+            Font font = new Font("SansSerif", Font.BOLD, 16);
+            dbg.setFont(font);
+            dbg.setColor(Color.YELLOW);
+            dbg.drawString("New Game", 100, 200);
+            dbg.drawString("Load Game", 100, 300);
+            dbg.drawString("Options", 100, 400);
+            dbg.drawRect(98, 185 + 100*mainMenuSelection, 104, 20);
+        } else {
+            // Calculate offset so that the hero is in the center of a screen.
+            int offsetX = hero.getPX() - MainPanel.WIDTH / 2;
+            // Character does not scroll at the edge of the map on the X-axis.
+            if (offsetX < 0) {
+                offsetX = 0;
+            } else if (offsetX > maps[mapNo].getWidth() - MainPanel.WIDTH) {
+                offsetX = maps[mapNo].getWidth() - MainPanel.WIDTH;
             }
 
-            Graphics2D g2d = (Graphics2D) dbg;
-            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
-            dbg.drawImage(gameOver, 64, 200, null);
+            int offsetY = hero.getPY() - MainPanel.HEIGHT / 2;
+            // Character does not scroll at the edge of the map on the Y-axis.
+            if (offsetY < 0) {
+                offsetY = 0;
+            } else if (offsetY > maps[mapNo].getHeight() - MainPanel.HEIGHT) {
+                offsetY = maps[mapNo].getHeight() - MainPanel.HEIGHT;
+            }
 
-            maps[mapNo].setGreyScale(true);
+            // Draw current map.
+            maps[mapNo].draw(dbg, offsetX, offsetY);
+
+            // Draw HUD window.
+            hudWindow.draw(dbg);
+
+            // Draw message window.
+            messageWindow.draw(dbg);
+
+            // Draw message window.
+            popup.draw(dbg);
+
+            inventoryWindow.draw(dbg);
+
+            // Draw quest window.
+            questWindow.draw(dbg);
+
+            if (isGameOver) {
+
+                try {
+                    gameOver = ImageIO.read(getClass().getResource("image/gameover.png"));
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, e.toString(), e);
+                }
+
+                Graphics2D g2d = (Graphics2D) dbg;
+                g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+                dbg.drawImage(gameOver, 64, 200, null);
+
+                maps[mapNo].setGreyScale(true);
+            }
         }
         
         // Display debug information if the mode is enabled (accessible through the boolean at the top of this Class).
@@ -365,6 +389,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         }
         // An action is performed if there are object events in front of or under the hero, depending on the case.
         if (enterKey.isPressed()) {
+            
+            saveGame();
             
             QuestEvent questEvent = hero.questSearch();
             if (questEvent != null) {
@@ -461,33 +487,24 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     }
     
     private void checkTrigger() {
-          TriggerEvent trigger = hero.touch();
-
+        TriggerEvent trigger = hero.touch();
         try{
-
-
-           for (int t = 0; t <trigger.gettLocation().size(); t++) {  
-           for (int i = 0; i < questList.size(); i++) {
-                if (trigger.getPoint(t).equals(questList.get(i).DXY)) {
-
-
-                  popup.setMessage("QUEST COMPLETE");
-                  popup.show();
-                 questList.get(i).setQuestFinished(true);
-
-                    maps[mapNo].removeEvent(trigger);
-                    return;  
-
-
-                } 
-           }
-           }
-
-        }catch(Exception e){
-            System.out.println(e);
+            for (int t = 0; t <trigger.gettLocation().size(); t++) {  
+                for (int i = 0; i < questList.size(); i++) {
+                    if (trigger.getPoint(t).equals(questList.get(i).DXY)) {
+                        popup.setMessage("QUEST COMPLETE");
+                        popup.show();
+                        questList.get(i).setQuestFinished(true);
+                            maps[mapNo].removeEvent(trigger);
+                            return;  
+                    } 
+                }
+            }
+        } catch(Exception e){
+            LOGGER.log(Level.FINER, e.toString(), e);
         }
-
     }
+    
     private void messageWindowCheckInput() {
         // Moves to the next page or exits the text box if there is no text left.
         if (enterKey.isPressed()) {
@@ -563,6 +580,42 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         }
     }
     
+    private void mainMenuCheckInput() {
+        // The cursor moves up and down the list of quests to see their description, reward, and requirements.
+        if (upKey.isPressed()) {
+            if (mainMenuSelection <= 0) {
+                mainMenuSelection = 0;
+            } else {
+                mainMenuSelection--;
+            }
+        }
+        if (downKey.isPressed()) {
+            if (mainMenuSelection >= 2) {
+                mainMenuSelection = 2;
+            } else {
+                mainMenuSelection++;
+            }
+        }
+        if (enterKey.isPressed()) {
+            if (mainMenuSelection == 0) {
+                isMainMenu = false;
+                leftKey = new ActionKey();
+                rightKey = new ActionKey();
+                upKey = new ActionKey();
+                downKey = new ActionKey();
+            } else if (mainMenuSelection == 1){
+                loadGame();
+                isMainMenu = false;
+                leftKey = new ActionKey();
+                rightKey = new ActionKey();
+                upKey = new ActionKey();
+                downKey = new ActionKey();
+            } else if (mainMenuSelection == 3) {
+                
+            }
+        }
+    }
+    
     private void heroMove() {
         if (hero.isMoving()) {
             if (hero.move()) {
@@ -574,12 +627,18 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     maps[mapNo].removeCharacter(hero);
                     mapNo = m.destMapNo;
                     hero = new Character(m.destX, m.destY, 0, DOWN, 0, 1, 0, maps[mapNo]);
+                    hero.setIsHero(true);
                     maps[mapNo].addCharacter(hero);
                     midiEngine.play(maps[mapNo].getBgmName());
+                    maps[mapNo].runThread();
                 }
                 
                 if (event instanceof TriggerEvent) {
                     checkTrigger();
+                }
+                
+                if (event instanceof SaveEvent) {
+                    saveGame();
                 }
             }
         }
@@ -596,8 +655,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             // The game over image is loaded from memory
             try {
                 gameOver = ImageIO.read(getClass().getResource("image/gameover.png"));
-            } catch (IOException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, e.toString(), e);
             }
             
             leftKey = new ActionKey(ActionKey.DEAD_INPUT);
@@ -651,6 +710,60 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     maps[mapNo].addAttack(attack);
                 }
                 c.increaseAttackCount();
+            }
+        }
+    }
+    
+    public void saveGame() {
+        try {
+            ObjectOutputStream out = new ObjectOutputStream( new FileOutputStream("savegame.txt"));
+            out.writeObject(hero);
+            out.writeObject(maps);
+            out.writeInt(mapNo);
+            out.writeObject(questList);
+            out.flush(); 
+            out.close();
+            
+        } catch (Exception e) {
+            try {
+                PrintWriter out = new PrintWriter("errors.txt");
+                out.println(e.toString() + e);
+            } catch (Exception n) {
+                System.out.println(e);
+            }
+        }
+    }
+    
+    public void loadGame() {
+        try {
+            ObjectInputStream in = new ObjectInputStream(new FileInputStream("savegame.txt")); 
+            
+            hero = (Character) in.readObject();
+            
+            maps = (Map[]) in.readObject();
+            mapNo = (Integer) in.readInt();
+            for (Map map: maps) {
+                map.runThread();
+                map.runAttackThread();
+                map.runCharacterThread();
+            }
+            
+            questList = (List<Quest>) in.readObject();
+            questWindow.sendQuestList(questList, currentQuest);
+            
+            questWindow.runThread();
+            inventoryWindow.runThread();
+            
+            in.close();
+            
+        } catch (IOException | ClassNotFoundException e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
+            try {
+                PrintWriter out = new PrintWriter("errors.txt");
+                out.println(e.toString());
+                out.close(); 
+            } catch (Exception n) {
+                // nothing happens
             }
         }
     }

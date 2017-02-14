@@ -1,6 +1,7 @@
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
+import java.io.Serializable;
 import java.util.HashMap;
 
 import javax.swing.ImageIcon;
@@ -8,7 +9,7 @@ import javax.swing.ImageIcon;
 /**
  * Created by hpro1 on 11/29/16.
  */
-public class InventoryEngine implements Common{
+public class InventoryEngine implements Common, Serializable{
     // chipset dimensions of items
     public static final int ITEM_WIDTH = CS;
     public static final int ITEM_HEIGHT = CS;

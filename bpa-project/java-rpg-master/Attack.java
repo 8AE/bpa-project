@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Vector;
 import javax.imageio.ImageIO;
 
@@ -14,7 +15,7 @@ import javax.imageio.ImageIO;
  *
  * @author hpro1
  */
-class Attack implements Common {
+class Attack implements Common, Serializable {
     
     private final int PROJECTILE_SPEED = 16; // must be divisable by 32
     
@@ -40,7 +41,7 @@ class Attack implements Common {
     private static BufferedImage image;
     
     // thread for attack animation
-    private Thread threadAnimation;
+    private transient Thread threadAnimation;
     
     public Attack(int x, int y, int direction, Weapon weapon, Character character, Map map) {
         
@@ -79,6 +80,12 @@ class Attack implements Common {
                     cx + CS,
                     cy + CS,// + direction * CS,
                     null);
+    }
+    
+    public void runThread() {
+        // run thread
+        threadAnimation = new Thread(new Attack.AttackAnimationThread());
+        threadAnimation.start();
     }
     
     public void setDirection(int direction) {
@@ -126,7 +133,7 @@ class Attack implements Common {
         }
     }
     
-    private class AttackAnimationThread extends Thread {
+    private class AttackAnimationThread extends Thread implements Serializable {
         public void run() {
             for (int i = 0; i < weapon.getRange() * (CS/PROJECTILE_SPEED); i++) {
                 switch (direction) {

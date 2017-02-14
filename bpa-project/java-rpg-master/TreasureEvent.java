@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.*;
 
-public class TreasureEvent extends Event {
+public class TreasureEvent extends Event implements Serializable {
     private String itemName;
 
     public TreasureEvent(int x, int y, String itemName) {

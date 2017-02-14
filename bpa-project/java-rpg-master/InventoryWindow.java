@@ -2,13 +2,14 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.io.Serializable;
 
 import javax.swing.ImageIcon;
 
 /**
  * Created by hpro1 on 11/22/16.
  */
-public class InventoryWindow implements Common {
+public class InventoryWindow implements Common, Serializable {
     // constants of inventory
     private static final int EDGE_WIDTH = 2;
     private static final int INV_START = 65;
@@ -65,7 +66,7 @@ public class InventoryWindow implements Common {
     private static final String[] soundNames = {"beep", "boop"};
     
     // the thread for the cursor animation
-    private Thread threadAnimation;
+    private transient Thread threadAnimation;
 
     public InventoryWindow(Rectangle rect) {
         // The base dimensions of the inventory window
@@ -203,6 +204,12 @@ public class InventoryWindow implements Common {
         // draw the actual items
         drawItems(g);
 
+    }
+    
+    public void runThread() {
+        // run thread
+        threadAnimation = new Thread(new InventoryWindow.AnimationThread());
+        threadAnimation.start();
     }
 
     /**

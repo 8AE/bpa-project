@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import javax.imageio.*;
 
-public class Character implements Common {
+public class Character implements Common, Serializable {
     private static final int SPEED = 4;
     public static final double PROB_MOVE = 0.02;
     public static final double PROB_ATTACK = 0.04;
@@ -51,7 +51,7 @@ public class Character implements Common {
     private boolean isAttacked = false;
     
     // thread for character animation
-    private Thread threadAnimation;
+    private transient Thread threadAnimation;
 
     // reference to Map
     private Map map;
@@ -148,6 +148,12 @@ public class Character implements Common {
                     cx + CS + count * CS,
                     cy + direction * CS + CS,
                     null);
+    }
+    
+    public void runThread() {
+        // run character animation thread
+        threadAnimation = new Thread(new AnimationThread());
+        threadAnimation.start();
     }
     
     /**
@@ -487,7 +493,8 @@ public class Character implements Common {
         }
         return null;
     }
-       public TriggerEvent touch() {
+    
+    public TriggerEvent touch() {
        
         Event event = map.checkEvent(x, y);
         if (event instanceof TriggerEvent) {
@@ -858,7 +865,7 @@ public class Character implements Common {
     }
 
     // Animation Class
-    private class AnimationThread extends Thread {
+    private class AnimationThread extends Thread implements Serializable {
         public void run() {
             while (true) {
                 // The count changes ever 0.3 seconds to shift between the Character animations.
