@@ -19,7 +19,7 @@ public class Quest implements Serializable {
     String questName;
     String questDisctription;
     Point DXY;
-
+    int target;
     String reward;
     String questType;
     int expGained;
@@ -69,6 +69,14 @@ public class Quest implements Serializable {
     public void setDXY(Point DXY) {
         this.DXY = DXY;
     }
+    
+    public int getTarget() {
+        return target;
+    }
+    
+    public void setTarget(int target) {
+        this.target = target;
+    }
 
     public int getExpGained() {
         return expGained;
@@ -78,7 +86,6 @@ public class Quest implements Serializable {
         return reward;
     }
 
-    // What is this??
     public void createQuest(String QT, String QN, String desc, int exp, String reward) {
         this.questType = QT;
         this.questName = QN;

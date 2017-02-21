@@ -75,7 +75,7 @@ public class Map implements Common, Serializable {
         loadMap(mapFile);
         loadEvent(eventFile);
         if (colorChipSet == null || greyscaleChipSet == null) {
-            loadImage("image/mapchip.gif");
+            loadImage("image/texture_sheet2.png");
             makeGreyScale(greyscaleChipSet);
         }
         currentChipSet = colorChipSet;
@@ -144,6 +144,7 @@ public class Map implements Common, Serializable {
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
             if (c.getHealth() <= 0) {
+                panel.CheckifQuestCharacter(c);
                 removeCharacter(c);
             }
         }
@@ -560,6 +561,9 @@ public class Map implements Common, Serializable {
                     makeTriggerEvent(st);
                 } else if (eventType.equals("SAVE")) {
                     makeSaveEvent(st);
+                } else if (eventType.equals("SHOP")) {
+                    // create a treasure chest
+                    makeShopEvent(st);
                 }
             }
         } catch (Exception e) {
@@ -613,8 +617,16 @@ public class Map implements Common, Serializable {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
         String itemName = st.nextToken();
-        TreasureEvent t = new TreasureEvent(x, y, itemName);
+            String itemType = st.nextToken();
+        TreasureEvent t = new TreasureEvent(x, y, itemName,itemType);
         events.add(t);
+    }
+    
+    private void makeShopEvent(StringTokenizer st) {
+        int x = Integer.parseInt(st.nextToken());
+        int y = Integer.parseInt(st.nextToken());
+        ShopEvent s = new ShopEvent(x, y);
+        events.add(s);
     }
 
     private void makeQuestEvent(StringTokenizer st) {
@@ -627,7 +639,8 @@ public class Map implements Common, Serializable {
         String reward = st.nextToken();
         int DX = Integer.parseInt(st.nextToken());
         int DY = Integer.parseInt(st.nextToken());
-        QuestEvent s = new QuestEvent(x, y, questType, questName, questDisctription, expGained, reward, DX, DY);
+         int target = Integer.parseInt(st.nextToken());
+        QuestEvent s = new QuestEvent(x, y, questType, questName, questDisctription, expGained, reward, DX, DY, target);
         events.add(s);
     }
 

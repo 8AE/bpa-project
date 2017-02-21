@@ -16,11 +16,12 @@ public class QuestEvent extends Event implements Serializable {
     private String questName;
     private String questDisctription;
     private int expGained;
+    private int target;
     private String reward;
     private Point DXY;
 
     public QuestEvent(int x, int y, String questType, String questName, String questDisctription,
-            int expGained, String reward, int DX, int DY) {
+            int expGained, String reward, int DX, int DY, int target) {
         super(x, y, 24, false);
         this.questType = questType;
         this.questName = questName;
@@ -28,6 +29,7 @@ public class QuestEvent extends Event implements Serializable {
         this.expGained = expGained;
         this.reward = reward;
         this.DXY = new Point(DX, DY);
+        this.target = target;
 
     }
 
@@ -53,6 +55,10 @@ public class QuestEvent extends Event implements Serializable {
 
     public String getReward() {
         return reward;
+    }
+    
+    public int getTarget() {
+        return target;
     }
 
     public String toString() {

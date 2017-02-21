@@ -480,6 +480,11 @@ public class InventoryWindow implements Common, Serializable {
         }
     }
 
+    public Item getItem(){
+        return invBoard[getInvBoardXPos()][getInvBoardYPos()];
+        
+    }
+    
     /**
      * Check if the inventory is full.
      *

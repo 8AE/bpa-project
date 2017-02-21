@@ -312,6 +312,10 @@ public class Character implements Common, Serializable {
         this.weapon = weapon;
     }
 
+    public int getId() {
+        return id;
+    }
+
     /**
      * Move the Character and continue to return true that they are moving until
      * the moving is completed. The Character moves progressively, pixel by
@@ -584,6 +588,34 @@ public class Character implements Common, Serializable {
         return null;
     }
 
+    public ShopEvent shopSearch() {
+        int nextX = 0;
+        int nextY = 0;
+        switch (direction) {
+            case LEFT:
+                nextX = x - 1;
+                nextY = y;
+                break;
+            case RIGHT:
+                nextX = x + 1;
+                nextY = y;
+                break;
+            case UP:
+                nextX = x;
+                nextY = y - 1;
+                break;
+            case DOWN:
+                nextX = x;
+                nextY = y + 1;
+                break;
+        }
+        Event event = map.checkEvent(nextX, nextY);
+        if (event instanceof ShopEvent) {
+            return (ShopEvent) event;
+        }
+        return null;
+    }
+    
     /**
      * Check if there is a door in front of the hero.
      *

@@ -45,7 +45,7 @@ class Attack implements Common, Serializable {
     private Character character;
 
     // weapon's chipset id
-    private int id = 5;
+    private int id;
     // the weapon chipset's image
     private static BufferedImage image;
 
@@ -67,6 +67,7 @@ class Attack implements Common, Serializable {
         this.weapon = weapon;
         this.map = map;
         this.character = character;
+        this.id = weapon.getId();
 
         // the weaponchip is loaded if it has not already
         if (image == null) {

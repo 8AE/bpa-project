@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import javax.sound.sampled.*;
 import javax.swing.JOptionPane;
 
-public class WaveEngine implements LineListener {
+public class WaveEngine implements LineListener,Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 
@@ -16,6 +16,7 @@ public class WaveEngine implements LineListener {
 
     private int maxClips;
     private int counter = 0;
+    Clip clip;
 
     public WaveEngine() {
         this(256);
@@ -55,7 +56,7 @@ public class WaveEngine implements LineListener {
                 System.exit(0);
             }
 
-            Clip clip = (Clip) AudioSystem.getLine(info);
+             clip = (Clip) AudioSystem.getLine(info);
             clip.addLineListener(this);
             clip.open(stream);
             clipMap.put(name, clip);
@@ -104,5 +105,13 @@ public class WaveEngine implements LineListener {
             clip.setFramePosition(0);
         }
     }
+    public void isLoop(boolean isLoop) {
+        if (isLoop) {
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
+        }
+        
+    }
+// load bgm files
+     
 
 }

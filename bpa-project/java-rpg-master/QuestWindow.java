@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,7 +16,7 @@ import javax.swing.JOptionPane;
 /**
  * Created by Ahmad El-baba on 1/3/2017.
  */
-public class QuestWindow implements Common {
+public class QuestWindow implements Common,Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 
@@ -35,6 +36,8 @@ public class QuestWindow implements Common {
 
     private static Thread threadAnimation;
 
+    
+    
     // outer frame
     private Rectangle boarder;
     // inner frame
@@ -42,10 +45,16 @@ public class QuestWindow implements Common {
 
     //CCurson
     private Rectangle cursor;
+    
+    private WaveEngine waveEngine;
+    private MidiEngine midiEngine;
+    private static final String[] soundNames = {"beep", "boop"};
 
     public QuestWindow(Rectangle rect) {
         messageEngine = new MessageEngine();
         questEngine = new QuestEngine();
+        waveEngine = new WaveEngine();
+        
         cursor = new Rectangle(70, 138, 214, 28);
         this.boarder = rect;
         innerRect = new Rectangle(
@@ -54,6 +63,8 @@ public class QuestWindow implements Common {
                 rect.width - EDGE_WIDTH * 2,
                 rect.height - EDGE_WIDTH * 2);
 
+        loadSound();
+        
         // run thread
         threadAnimation = new Thread(new QuestWindow.AnimationThread());
         threadAnimation.start();
@@ -137,11 +148,11 @@ public class QuestWindow implements Common {
                 if (!isMoving) {
                     isMoving = true;
                     if (canMoveDown()) {
-                        //waveEngine.play("beep");
+                        waveEngine.play("beep");
                         questBoardSpot++;
                     } else {
                         questBoardSpot = 0;
-                        //waveEngine.play("boop");
+                        waveEngine.play("boop");
                     }
                 }
                 isMoving = false;
@@ -150,13 +161,13 @@ public class QuestWindow implements Common {
                 if (!isMoving) {
                     isMoving = true;
                     if (canMoveUp()) {
-                        //waveEngine.play("beep");
+                        waveEngine.play("beep");
                         questBoardSpot--;
                     } else if (questList.size() == 0) {
                         questBoardSpot = questList.size();
                     } else {
                         questBoardSpot = questList.size() - 1;
-                    } //waveEngine.play("boop");
+                    }   waveEngine.play("boop");
                 }
                 isMoving = false;
                 break;
@@ -203,6 +214,14 @@ public class QuestWindow implements Common {
         return questBoardSpot;
     }
 
+    private void loadSound() {
+        
+        // load sound clip files
+        for (String soundName : soundNames) {
+            waveEngine.load(soundName, "sound/" + soundName + ".wav");
+        }
+    }
+    
     private class AnimationThread extends Thread {
 
         public void run() {

@@ -1,4 +1,5 @@
 
+import java.awt.Point;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -29,10 +30,11 @@ public class QuestEngine {
         switch (quest.getQuestType()) {
             case "OBJECTIVE":
                 quest.setDXY(questEvent.getDXY());
+                quest.setTarget(-1);
                 break;
-            case "Collective":
-                break;
-            case "Elimination":
+            case "ELIMINATION":
+                quest.setTarget(questEvent.getTarget());
+                quest.setDXY(new Point(0,0));
                 break;
             default:
                 break;

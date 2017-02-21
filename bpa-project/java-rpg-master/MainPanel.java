@@ -68,7 +68,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     private ActionKey questKey;
     private ActionKey attackKey;
     private ActionKey tabKey;
-    private ActionKey menuKey;
+    private ActionKey escKey;
 
     // thread that loops the painting of images on screen
     private static Thread gameLoop;
@@ -84,12 +84,17 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     // The window for the inventory.
     private InventoryWindow inventoryWindow;
-    private static Rectangle INV_RECT = new Rectangle(64, 96, 512, 352);
-
     // The window for the quest list.
     private QuestWindow questWindow;
-    private static Rectangle QUE_RECT = new Rectangle(64, 96, 512, 352);
+    // The window for the Shop list.
+    private ShopWindow shopWindow;
+    // The basic window Rectangle
+    private static Rectangle MENU_RECT = new Rectangle(64, 96, 512, 352);
 
+    // The window for the pause menu
+    private PauseWindow pauseWindow;
+    private static Rectangle PAUSE_RECT = new Rectangle(290, 200, 110, 155);
+    
     //Draws the popup
     private NotificationPopup popup;
     private static Rectangle POP_RECT = new Rectangle(300, 96, 250, 45);
@@ -99,7 +104,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     private HudWindow hudWindow;
 
     // The engines for the sounds are declared and initialized.
-    private MidiEngine midiEngine = new MidiEngine();
+    private WaveEngine bgm = new WaveEngine();
     private WaveEngine waveEngine = new WaveEngine();
 
     // BGM
@@ -145,42 +150,53 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         inventoryKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         questKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         attackKey = new ActionKey(ActionKey.SLOWER_INPUT);
-        menuKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
+        escKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
 
         // Create maps.
-        maps = new Map[3];
-        maps[0] = new Map("map/castle.map", "event/castle.evt", "castle", this);
+        maps = new Map[6];
+        maps[0] = new Map("map/castle.map", "event/castle.evt", "theme", this);
         maps[1] = new Map("map/field.map", "event/field.evt", "field", this);
         maps[2] = new Map("map/map.map", "event/map.evt", "field", this);
-        mapNo = 0;  // initial map
+        maps[3] = new Map("map/level2.map", "event/level2.evt", "field", this);
+        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "field", this);
+        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "field", this);
+        mapNo = 4;  // initial map
 
         // Create the main character, our hero.
         // This is also the start point of the game.
-        hero = new Character(6, 6, 0, DOWN, 0, 1, 0, maps[mapNo]);
+        hero = new Character(15, 21, 0, DOWN, 0, 1, 0, maps[mapNo]);
         hero.setIsHero(true);
 
         // Add characters to the map.
         maps[mapNo].addCharacter(hero);
 
+        // Create Shop Window
+        shopWindow = new ShopWindow(MENU_RECT);
+        
         // Create message window.
         messageWindow = new MessageWindow(WND_RECT);
-
+        
         // Create inventory window.
-        inventoryWindow = new InventoryWindow(INV_RECT);
-
+        inventoryWindow = new InventoryWindow(MENU_RECT);
+        
         // Create quest window.
-        questWindow = new QuestWindow(QUE_RECT);
-
+        questWindow = new QuestWindow(MENU_RECT);
+        
+        // Create Shop Window
+        pauseWindow = new PauseWindow(PAUSE_RECT);
+        
         // Create HUD.
         hudWindow = new HudWindow();
-
+        
         // Create the popup window.
         popup = new NotificationPopup(POP_RECT);
 
         // Load Backgound Music (BGM) and sound clips.
         loadSound();
         // The background music of the main menu plays.
-        midiEngine.play("field");
+        bgm.play("main");
+        bgm.isLoop(true);
+
 
         // Start game loop.
         gameLoop = new Thread(this);
@@ -242,6 +258,10 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 gameOverCheckInput();
             } else if (inventoryWindow.isVisible()) {
                 inventoryWindowCheckInput();
+            } else if (shopWindow.isVisible()) {
+                shopWindowCheckInput();
+            } else if (pauseWindow.isVisible()) {
+                pauseWindowCheckInput();
             } else if (questWindow.isVisible()) {
                 questWindowCheckInput();
             } else {
@@ -252,7 +272,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     private void gameUpdate() {
         // If only the main panel is visable, then the activities that reside within it function.
-        if (!messageWindow.isVisible() && !inventoryWindow.isVisible() && !questWindow.isVisible() && !isMainMenu && !isStart) {
+        if (!messageWindow.isVisible() && !inventoryWindow.isVisible() && !questWindow.isVisible() && !isMainMenu && !isStartUp && !isStart && !pauseWindow.isVisible()) {
             heroMove();
             characterMove();
             characterAttack();
@@ -291,7 +311,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         if (isStart) {
             
             try {
-                credits = ImageIO.read(getClass().getResource("image/gameover.png"));
+                credits = ImageIO.read(getClass().getResource("image/credits.png"));
             } catch (IOException | IllegalArgumentException e) {
                 LOGGER.log(Level.SEVERE, e.toString(), e);
 
@@ -369,6 +389,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             // Draw HUD window.
             hudWindow.draw(dbg);
 
+            //Draws Shop Winodw
+            shopWindow.draw(dbg);
+            
             // Draw popup message window.
             popup.draw(dbg);
 
@@ -378,6 +401,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             // Draw quest window.
             questWindow.draw(dbg);
 
+            // Draw pause Menu
+            pauseWindow.draw(dbg);
+            
             if (isGameOver) {
                 try {
                     gameOver = ImageIO.read(getClass().getResource("image/gameover.png"));
@@ -476,8 +502,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 isMainMenu = true;
                 isGameOver = false;
 
-                midiEngine.play("field");
-
+                bgm.play("main");
+bgm.isLoop(true);
                 leftKey = new ActionKey();
                 rightKey = new ActionKey();
                 upKey = new ActionKey(ActionKey.SLOWER_INPUT);
@@ -487,7 +513,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     loadGame();
 
                 // The background music of the loaded map plays.
-                midiEngine.play(maps[mapNo].getBgmName());
+                bgm.play(maps[mapNo].getBgmName());
+                bgm.isLoop(true);
 
                 isGameOver = false;
 
@@ -533,11 +560,34 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 hero.setMoving(true);
             }
         }
+        
+        //The pause menu opens
+        if (escKey.isPressed()) {
+            enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
+            leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            upKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            downKey = new ActionKey(ActionKey.SLOWER_INPUT);
+            
+            pauseWindow.show();
+            
+        }
+        
         // An action is performed if there are object events in front of or under the hero, depending on the case.
         if (enterKey.isPressed()) {
 
-            saveGame();
-            System.out.println(new SimpleDateFormat("[yyyy.MM.dd.HH:mm:ss]").format(new Date()));
+            ShopEvent shopEvent = hero.shopSearch();
+            if (shopEvent != null) {
+                // waveEngine.play("treasure");
+                System.out.print("Hello");
+                leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                upKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                downKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                shopWindow.show();
+                
+                return;
+            }
 
             QuestEvent questEvent = hero.questSearch();
             if (questEvent != null) {
@@ -571,8 +621,14 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 waveEngine.play("treasure"); // Sound of chest opening.
                 messageWindow.show(); // The message window appears to display to the user what the item in the chest is.
                 if (!inventoryWindow.isFull()) {
-                    inventoryWindow.add(treasure.toItem()); // Item is added based on positioning on item chip image.
+                    if (treasure.getItemType().equals("WEAPON")) {
+                        inventoryWindow.add(treasure.toWeapon()); // Item is added based on positioning on item chip image.
+                    } else {
+                        inventoryWindow.add(treasure.toItem()); // Item is added based on positioning on item chip image.
+                        
+                    }
                     messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName());
+                    
                 } else { // When the inventory of the hero is full, the user must choose where to make room.
                     messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName() + "|YOUR INVENTORY IS/FULL! YOU NEED TO/MAKE SPACE!");
                     // Action key movement types are changed to work with the inventory.
@@ -580,7 +636,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     upKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     downKey = new ActionKey(ActionKey.SLOWER_INPUT);
-
+                    
                     // Inventory window is opened with the "TRASH_ITEM" mode enabled to make space for new item.
                     inventoryWindow.show(InventoryWindow.TRASH_ITEM, treasure.toItem());
                 }
@@ -624,10 +680,12 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         // The hero attacks.
         if (attackKey.isPressed()) {
-            // An attack is created on the tile the hero is on.
-            Attack attack = new Attack(hero.getX(), hero.getY(), hero.getDirection(), hero.getWeapon(), hero, maps[mapNo]);
-            // The attack is added to the map.
-            maps[mapNo].addAttack(attack);
+            if (hudWindow.getSelectedItem() != null) {
+                // An attack is created on the tile the hero is on.
+                Attack attack = new Attack(hero.getX(), hero.getY(), hero.getDirection(), hero.getWeapon(), hero, maps[mapNo]);
+                // The attack is added to the map.
+                maps[mapNo].addAttack(attack);
+            }
         }
     }
 
@@ -685,7 +743,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             inventoryWindow.nextFocus();
         }
         // When the inventory key is pressed, it closes the inventory while in the inventory.
-        if (inventoryKey.isPressed()) {
+        if (inventoryKey.isPressed() || escKey.isPressed()) {
             // set movement keys back to constant input
             leftKey = new ActionKey();
             rightKey = new ActionKey();
@@ -702,12 +760,24 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         // The enter key selects what ever the cursor is on.
         if (enterKey.isPressed()) {
             inventoryWindow.select();
+            if (inventoryWindow.getItem() == null) {
+                hudWindow.selectItem(inventoryWindow.getItem());
+                return;
+            }
+            
+            if (inventoryWindow.getItem() instanceof Weapon) {
+                hudWindow.selectItem(inventoryWindow.getItem());
+                hero.setWeapon((Weapon)hudWindow.getSelectedItem());
+            } else {
+                messageWindow.setMessage("YOU CANT EQUIPT THAT");
+                messageWindow.show();
+            }
         }
     }
 
     private void questWindowCheckInput() {
         // When the quest key is pressed again, the quest window is closed.
-        if (questKey.isPressed()) {
+        if (questKey.isPressed() || escKey.isPressed()) {
             // set movement keys back to constant input
             leftKey = new ActionKey();
             rightKey = new ActionKey();
@@ -727,6 +797,77 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             questWindow.hide();
             inventoryWindow.show();
         }
+    }
+    
+    private void shopWindowCheckInput() {
+        // When the escape key is pressed again, the shop window is closed.
+        if (escKey.isPressed()) {
+            // set movement keys back to constant input
+            leftKey = new ActionKey();
+            rightKey = new ActionKey();
+            upKey = new ActionKey();
+            downKey = new ActionKey();
+            shopWindow.hide();
+            
+        }
+        // The cursor moves left and right to see the items
+        if (leftKey.isPressed()) {
+            shopWindow.setDirection(LEFT);
+        }
+        if (rightKey.isPressed()) {
+            shopWindow.setDirection(RIGHT);
+        }
+        
+    }
+    
+    private void pauseWindowCheckInput() {
+        // When the escape key is pressed again, the shop window is closed.
+        if (escKey.isPressed()) {
+            // set movement keys back to constant input
+            enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
+            leftKey = new ActionKey();
+            rightKey = new ActionKey();
+            upKey = new ActionKey();
+            downKey = new ActionKey();
+            
+            pauseWindow.hide();
+            
+        }
+        // The cursor moves left and right to see the items
+        if (upKey.isPressed()) {
+            pauseWindow.setDirection(UP);
+        }
+        if (downKey.isPressed()) {
+            pauseWindow.setDirection(DOWN);
+        }
+        if (enterKey.isPressed()) {
+            switch (pauseWindow.getPauseBoardPos()) {
+                case 0:
+                    enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
+                    leftKey = new ActionKey();
+                    rightKey = new ActionKey();
+                    upKey = new ActionKey();
+                    downKey = new ActionKey();
+                    
+                    pauseWindow.hide();
+                    break;
+                case 1:
+                    saveGame();
+                    enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
+                    leftKey = new ActionKey();
+                    rightKey = new ActionKey();
+                    upKey = new ActionKey();
+                    downKey = new ActionKey();
+                    
+                    pauseWindow.hide();
+                    break;
+                case 2:
+                    
+                    System.exit(0);
+                    break;
+            }
+        }
+        
     }
 
     private void mainMenuCheckInput() {
@@ -755,8 +896,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 newGame();
 
                 // The background music of the initial map plays.
-                midiEngine.play(maps[mapNo].getBgmName());
-
+                bgm.play(maps[mapNo].getBgmName());
+bgm.isLoop(true);
                 leftKey = new ActionKey();
                 rightKey = new ActionKey();
                 upKey = new ActionKey();
@@ -768,8 +909,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     loadGame();
 
                     // The background music of the loaded map plays.
-                    midiEngine.play(maps[mapNo].getBgmName());
-
+                    bgm.play(maps[mapNo].getBgmName());
+bgm.isLoop(true);
+                    
                     isMainMenu = false;
                     leftKey = new ActionKey();
                     rightKey = new ActionKey();
@@ -800,7 +942,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     hero = new Character(m.destX, m.destY, 0, DOWN, 0, 1, 0, maps[mapNo]);
                     hero.setIsHero(true);
                     maps[mapNo].addCharacter(hero);
-                    midiEngine.play(maps[mapNo].getBgmName());
+                    bgm.play(maps[mapNo].getBgmName());
+                    bgm.isLoop(true);
                     maps[mapNo].runThread();
                 }
 
@@ -861,6 +1004,21 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     c.setMoving(true);
                 }
             }
+        }
+    }
+    
+    public void CheckifQuestCharacter(Character c) {
+        try {
+            for (int i = 0; i < questWindow.getQuests().size(); i++) {
+                if (c.getId() == questWindow.getQuests().get(i).getTarget()) {
+                    popup.setMessage("QUEST COMPLETE");
+                    popup.show();
+                    questWindow.getQuests().get(i).setQuestFinished(true);
+                    
+                }
+            }
+        } catch (Exception e) {
+            
         }
     }
 
@@ -961,16 +1119,20 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         attackKey = new ActionKey(ActionKey.SLOWER_INPUT);
 
         // Create maps.
-        maps = new Map[3];
-        maps[0] = new Map("map/castle.map", "event/castle.evt", "castle", this);
+         maps = new Map[6];
+        maps[0] = new Map("map/castle.map", "event/castle.evt", "theme", this);
         maps[1] = new Map("map/field.map", "event/field.evt", "field", this);
         maps[2] = new Map("map/map.map", "event/map.evt", "field", this);
-        mapNo = 0;  // initial map
+        maps[3] = new Map("map/level2.map", "event/level2.evt", "field", this);
+        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "field", this);
+        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "field", this);
+        mapNo = 4;  // initial map
 
         // Create the main character, our hero.
         // This is also the start point of the game.
-        hero = new Character(6, 6, 0, DOWN, 0, 1, 0, maps[mapNo]);
+        hero = new Character(15, 21, 0, DOWN, 0, 1, 0, maps[mapNo]);
         hero.setIsHero(true);
+
 
         // Add characters to the map.
         maps[mapNo].addCharacter(hero);
@@ -979,10 +1141,10 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         messageWindow = new MessageWindow(WND_RECT);
 
         // Create inventory window.
-        inventoryWindow = new InventoryWindow(INV_RECT);
+        inventoryWindow = new InventoryWindow(MENU_RECT);
 
         // Create quest window.
-        questWindow = new QuestWindow(QUE_RECT);
+        questWindow = new QuestWindow(MENU_RECT);
 
         // Create HUD.
         hudWindow = new HudWindow();
@@ -1028,6 +1190,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             if (keyCode == KeyEvent.VK_P) {
                 tabKey.press();
             }
+            if (keyCode == KeyEvent.VK_ESCAPE) {
+                escKey.press();
+            }
         }
     }
 
@@ -1064,6 +1229,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         if (keyCode == KeyEvent.VK_P) {
             tabKey.release();
         }
+        if (keyCode == KeyEvent.VK_ESCAPE) {
+            escKey.release();
+        }
     }
 
     @Override
@@ -1071,11 +1239,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     }
 
     private void loadSound() {
-        // load midi files
+      
+ // load bgm files
         for (String bgmName : bgmNames) {
-            midiEngine.load(bgmName, "bgm/" + bgmName + ".mid");
+            bgm.load(bgmName, "bgm/" + bgmName + ".wav");
         }
-
         // load sound clip files
         for (String soundName : soundNames) {
             waveEngine.load(soundName, "sound/" + soundName + ".wav");
