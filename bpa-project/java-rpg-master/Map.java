@@ -1,10 +1,18 @@
+
 import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.awt.image.*;
+import java.text.SimpleDateFormat;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.*;
+import javax.swing.JOptionPane;
 
 public class Map implements Common, Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     // map data
     private int[][] map;
 
@@ -29,13 +37,13 @@ public class Map implements Common, Serializable {
     private Vector<Event> events = new Vector<Event>();
     // attacks in this map
     private Vector<Attack> attacks = new Vector<Attack>();
-    
+
     // reference to MainPanel
-    private MainPanel panel;
+    private transient MainPanel panel;
 
     // the thread to monitor the attacks on characters
     private transient Thread threadDamage;
-    
+
     // the map file location and the background music location
     private String mapFile;
     private String bgmName;
@@ -46,11 +54,12 @@ public class Map implements Common, Serializable {
     private Rectangle healthBar;
     // health bar boarder
     private Rectangle outerHealthBar;
-    
+
     /**
-     * The map that is created for the user to view and interact with. Everything that the user sees
-     * from the actual map is painted and loaded here.
-     * 
+     * The map that is created for the user to view and interact with.
+     * Everything that the user sees from the actual map is painted and loaded
+     * here.
+     *
      * @param mapFile the root location of this map's chipset pattern file
      * @param eventFile the root location of this map's events
      * @param bgmName the root location of this map's background music
@@ -60,6 +69,7 @@ public class Map implements Common, Serializable {
         // initialize the variables
         this.mapFile = mapFile;
         this.bgmName = bgmName;
+        this.panel = panel;
 
         // load the chip sets and make the greyscaled one in greyscale
         loadMap(mapFile);
@@ -69,26 +79,26 @@ public class Map implements Common, Serializable {
             makeGreyScale(greyscaleChipSet);
         }
         currentChipSet = colorChipSet;
-        
+
         // initialize the health bar rectangles.
         healthBarBackround = new Rectangle(2, -10, 30, 4);
         healthBar = new Rectangle(2, -10, 30, 4);
         outerHealthBar = new Rectangle(0, -6, 34, 14);
-        
+
         // run damage thread
         threadDamage = new Thread(new Map.AttackDamageThread());
         threadDamage.start();
     }
 
     /**
-     *  Draw the map to the screen.
-     * 
+     * Draw the map to the screen.
+     *
      * @param g the Graphics the map is being with.
      * @param offsetX the offset X value of the hero.
      * @param offsetY the offset Y value of the hero.
      */
     public void draw(Graphics g, int offsetX, int offsetY) {
-        
+
         // display xrange of map (unit:pixel)
         int firstTileX = pixelsToTiles(offsetX);
         int lastTileX = firstTileX + pixelsToTiles(MainPanel.WIDTH) + 1;
@@ -107,11 +117,11 @@ public class Map implements Common, Serializable {
                 int cx = (map[i][j] % 8) * CS;
                 int cy = (map[i][j] / 8) * CS;
                 g.drawImage(currentChipSet,
-                            tilesToPixels(j) - offsetX,
-                            tilesToPixels(i) - offsetY,
-                            tilesToPixels(j) - offsetX + CS,
-                            tilesToPixels(i) - offsetY + CS,
-                            cx, cy, cx + CS, cy + CS, panel);
+                        tilesToPixels(j) - offsetX,
+                        tilesToPixels(i) - offsetY,
+                        tilesToPixels(j) - offsetX + CS,
+                        tilesToPixels(i) - offsetY + CS,
+                        cx, cy, cx + CS, cy + CS, panel);
 
                 // draw tile associated with the event on (i, j)
                 for (int n = 0; n < events.size(); n++) {
@@ -120,11 +130,11 @@ public class Map implements Common, Serializable {
                         cx = (event.id % 8) * CS;
                         cy = (event.id / 8) * CS;
                         g.drawImage(currentChipSet,
-                                    tilesToPixels(j) - offsetX,
-                                    tilesToPixels(i) - offsetY,
-                                    tilesToPixels(j) - offsetX + CS,
-                                    tilesToPixels(i) - offsetY + CS,
-                                    cx, cy, cx + CS, cy + CS, panel);
+                                tilesToPixels(j) - offsetX,
+                                tilesToPixels(i) - offsetY,
+                                tilesToPixels(j) - offsetX + CS,
+                                tilesToPixels(i) - offsetY + CS,
+                                cx, cy, cx + CS, cy + CS, panel);
                     }
                 }
             }
@@ -137,19 +147,19 @@ public class Map implements Common, Serializable {
                 removeCharacter(c);
             }
         }
-        
+
         // draw characters in this map
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
             c.draw(g, offsetX, offsetY);
         }
-        
+
         // draw attacks in this map
         for (int i = 0; i < attacks.size(); i++) {
             Attack a = attacks.get(i);
             a.draw(g, offsetX, offsetY);
         }
-        
+
         //draw health bar for characters
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
@@ -158,18 +168,20 @@ public class Map implements Common, Serializable {
     }
 
     /**
-     * Check the tile the hero wants to move to next if it can be moved on. Various tiles
-     * other Characters, and certain Events cannot be moved on.
-     * 
+     * Check the tile the hero wants to move to next if it can be moved on.
+     * Various tiles other Characters, and certain Events cannot be moved on.
+     *
      * @param x the x position the hero wants to be moved to.
      * @param y the y position the hero wants to be moved to.
      * @return if the hero can move there (false) or not (true)
      */
     public boolean isHit(int x, int y) {
         // Check if there are tiles here that cannot be passed.
-        if (map[y][x] == 1 ||    // wall
-            map[y][x] == 2 ||    // throne
-            map[y][x] == 5) {    // sea
+        if (map[y][x] == 1
+                || // wall
+                map[y][x] == 2
+                || // throne
+                map[y][x] == 5) {    // sea
             return true;
         }
 
@@ -197,21 +209,22 @@ public class Map implements Common, Serializable {
         threadDamage = new Thread(new Map.AttackDamageThread());
         threadDamage.start();
     }
-    
+
     public void runAttackThread() {
         for (Attack attack : attacks) {
             attack.runThread();
         }
     }
-    
+
     public void runCharacterThread() {
         for (Character character : characters) {
             character.runThread();
         }
     }
-    
+
     /**
      * Add a Character to this map.
+     *
      * @param c a Character to add to this map.
      */
     public void addCharacter(Character c) {
@@ -220,30 +233,34 @@ public class Map implements Common, Serializable {
 
     /**
      * Remove a Character from this map.
+     *
      * @param c a Character to remove from this map.
      */
     public void removeCharacter(Character c) {
         characters.remove(c);
     }
-    
+
     /**
      * Add an Attack to this map.
+     *
      * @param a an Attack to add to this map.
      */
     public void addAttack(Attack a) {
         attacks.add(a);
     }
-    
+
     /**
      * Remove a Character from this map.
+     *
      * @param a an Attack to remove from this map.
      */
     public void removeAttack(Attack a) {
         attacks.remove(a);
     }
-    
+
     /**
      * Remove an event from this map.
+     *
      * @param event an Event to remove from this map.
      */
     public void removeEvent(Event event) {
@@ -252,6 +269,7 @@ public class Map implements Common, Serializable {
 
     /**
      * Check if there is a Character in the (x,y) coordinate on this map.
+     *
      * @param x the x coordinate of this map to check.
      * @param y the y coordinate of this map to check.
      * @return the Character in the spot.
@@ -265,9 +283,10 @@ public class Map implements Common, Serializable {
         }
         return null;
     }
-    
+
     /**
      * Check if there is an Attack in the (x,y) coordinate on this map.
+     *
      * @param x the x coordinate of this map to check.
      * @param y the y coordinate of this map to check.
      * @return the Attack in the spot.
@@ -284,6 +303,7 @@ public class Map implements Common, Serializable {
 
     /**
      * Check if there is an Event in the (x,y) coordinate on this map.
+     *
      * @param x the x coordinate of this map to check.
      * @param y the y coordinate of this map to check.
      * @return the Event in the spot.
@@ -300,6 +320,7 @@ public class Map implements Common, Serializable {
 
     /**
      * Makes a BufferedImage greyscaled.
+     *
      * @param img the BufferedImage you want to make greyscale.
      */
     public void makeGreyScale(BufferedImage img) {
@@ -308,33 +329,34 @@ public class Map implements Common, Serializable {
         int height = img.getHeight();
 
         // Convert to grayscale
-        for(int pixelY = 0; pixelY < height; pixelY++){
-            for(int pixelX = 0; pixelX < width; pixelX++){
-                
+        for (int pixelY = 0; pixelY < height; pixelY++) {
+            for (int pixelX = 0; pixelX < width; pixelX++) {
+
                 // Pull out the pixel we want to manipulate
-                int pixel = img.getRGB(pixelX,pixelY);
+                int pixel = img.getRGB(pixelX, pixelY);
 
                 // Obtain the ARGB of the pixel.
                 // We do not need the alpha value, but we must take it out to access the other three values.
-                int alpha = (pixel>>24)&0xff;
-                int red = (pixel>>16)&0xff;
-                int green = (pixel>>8)&0xff;
-                int blue = pixel&0xff;
+                int alpha = (pixel >> 24) & 0xff;
+                int red = (pixel >> 16) & 0xff;
+                int green = (pixel >> 8) & 0xff;
+                int blue = pixel & 0xff;
 
                 // Calculate the average color.
-                int average = (red+green+blue)/3;
+                int average = (red + green + blue) / 3;
 
                 // Replace ARGB value with avg, making it greyscaled.
-                pixel = (alpha<<24) | (average<<16) | (average<<8) | average;
+                pixel = (alpha << 24) | (average << 16) | (average << 8) | average;
 
                 // Set the pixel to the new greyscaled pixel.
                 img.setRGB(pixelX, pixelY, pixel);
             }
         }
     }
-    
+
     /**
      * Set the map to greyscale.
+     *
      * @param bool true = turn on greyscale; false = turn off greyscale
      */
     public void setGreyScale(boolean bool) {
@@ -343,30 +365,32 @@ public class Map implements Common, Serializable {
         } else {
             currentChipSet = colorChipSet;
         }
-        
+
         // Check each Character in this map and make each one of them greyscaled.
         for (int i = 0; i < characters.size(); i++) {
-               characters.get(i).setGreyScale(bool);
+            characters.get(i).setGreyScale(bool);
         }
-    }
-    
-    /**
-     * Convert from pixel to tile. Divides the pixel input by the constant CS, 
-     * which is the number of pixels per tile.
-     * 
-     * @param pixels the pixel location to find the tile it is on.
-     * @return the number tile that the pixel is from, starting from 0 and moving up.
-     */
-    public static int pixelsToTiles(double pixels) {
-        return (int)Math.floor(pixels / CS);
     }
 
     /**
-     * Convert from tile to pixel. Multiplies the tile input by the CS,
+     * Convert from pixel to tile. Divides the pixel input by the constant CS,
      * which is the number of pixels per tile.
-     * 
+     *
+     * @param pixels the pixel location to find the tile it is on.
+     * @return the number tile that the pixel is from, starting from 0 and
+     * moving up.
+     */
+    public static int pixelsToTiles(double pixels) {
+        return (int) Math.floor(pixels / CS);
+    }
+
+    /**
+     * Convert from tile to pixel. Multiplies the tile input by the CS, which is
+     * the number of pixels per tile.
+     *
      * @param tiles the pixel location to find the tile it is on.
-     * @return the number pixel that the starts from, starting from 0 and moving up in intervals of CS.
+     * @return the number pixel that the starts from, starting from 0 and moving
+     * up in intervals of CS.
      */
     public static int tilesToPixels(int tiles) {
         return tiles * CS;
@@ -374,6 +398,7 @@ public class Map implements Common, Serializable {
 
     /**
      * The number of rows of tiles this map has.
+     *
      * @return the number of rows.
      */
     public int getRow() {
@@ -382,6 +407,7 @@ public class Map implements Common, Serializable {
 
     /**
      * The number of columns this map has.
+     *
      * @return the number of columns.
      */
     public int getCol() {
@@ -390,6 +416,7 @@ public class Map implements Common, Serializable {
 
     /**
      * The number of pixels that make up this Map's width.
+     *
      * @return the number of pixels.
      */
     public int getWidth() {
@@ -398,22 +425,25 @@ public class Map implements Common, Serializable {
 
     /**
      * The number of pixels that make up this Map's height.
+     *
      * @return the number of pixels.
      */
     public int getHeight() {
         return height;
     }
-    
+
     /**
      * The Characters on this map.
+     *
      * @return the Vector of Characters.
      */
     public Vector<Character> getCharacters() {
         return characters;
     }
-    
+
     /**
      * The Attacks on this map.
+     *
      * @return the Vector of Attacks.
      */
     public Vector<Attack> getAttacks() {
@@ -422,6 +452,7 @@ public class Map implements Common, Serializable {
 
     /**
      * The Background music file of this map.
+     *
      * @return the background music file location of this Map.
      */
     public String getBgmName() {
@@ -430,30 +461,33 @@ public class Map implements Common, Serializable {
 
     /**
      * The tile file of this map.
+     *
      * @return the map tile file location location of this Map.
      */
     public String getMapName() {
         return mapFile;
     }
-    
+
     /**
      * Check the Vector of characters to find the one that is the hero.
+     *
      * @return the hero when it is found.
      */
     public Character getHero() {
-        for (int i = 0; i < characters.size(); i++) {  
+        for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
-            
+
             if (c.getIsHero()) {
                 return c;
             }
         }
-        
+
         return null;
     }
-    
+
     /**
      * Load the tile map file.
+     *
      * @param filename the location of the tiles to load.
      */
     private void loadMap(String filename) {
@@ -467,21 +501,29 @@ public class Map implements Common, Serializable {
             this.height = this.row * 32;
             this.map = new int[this.row][this.col];
 
-            for(int i = 0; i < this.row; ++i) {
+            for (int i = 0; i < this.row; ++i) {
                 line = e.readLine();
                 StringTokenizer st = new StringTokenizer(line, ",");
 
-                for(int j = 0; j < this.col; ++j) {
+                for (int j = 0; j < this.col; ++j) {
                     this.map[i][j] = Integer.parseInt(st.nextToken());
                 }
             }
-        } catch (Exception var7) {
-            var7.printStackTrace();
+        } catch (IOException | NumberFormatException e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         }
     }
 
     /**
      * Load the events file for this map.
+     *
      * @param filename the location of the event file to load.
      */
     private void loadEvent(String filename) {
@@ -491,9 +533,13 @@ public class Map implements Common, Serializable {
             String line;
             while ((line = br.readLine()) != null) {
                 // skip null lines
-                if (line.equals("")) continue;
+                if (line.equals("")) {
+                    continue;
+                }
                 // skip comment lines
-                if (line.startsWith("#")) continue;
+                if (line.startsWith("#")) {
+                    continue;
+                }
                 StringTokenizer st = new StringTokenizer(line, ",");
                 String eventType = st.nextToken();
                 if (eventType.equals("CHARACTER")) {
@@ -508,23 +554,29 @@ public class Map implements Common, Serializable {
                 } else if (eventType.equals("MOVE")) {
                     // create a warp location
                     makeMoveEvent(st);
-                }
-                else if (eventType.equals("QUEST")) {
+                } else if (eventType.equals("QUEST")) {
                     makeQuestEvent(st);
-                }
-                else if (eventType.equals("TRIGGER")) {
+                } else if (eventType.equals("TRIGGER")) {
                     makeTriggerEvent(st);
                 } else if (eventType.equals("SAVE")) {
                     makeSaveEvent(st);
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.toString(), e);
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         }
     }
 
     /**
      * Load an image from the image folder for the chipset.
+     *
      * @param filename the location of the chipset to load.
      */
     private void loadImage(String filename) {
@@ -532,7 +584,14 @@ public class Map implements Common, Serializable {
             colorChipSet = ImageIO.read(getClass().getResource(filename));
             greyscaleChipSet = ImageIO.read(getClass().getResource(filename));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.toString(), e);
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         }
     }
 
@@ -557,18 +616,18 @@ public class Map implements Common, Serializable {
         TreasureEvent t = new TreasureEvent(x, y, itemName);
         events.add(t);
     }
-    
+
     private void makeQuestEvent(StringTokenizer st) {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
         String questType = st.nextToken();
         String questName = st.nextToken();
-         String questDisctription = st.nextToken();
-          int expGained = Integer.parseInt(st.nextToken());
-           String reward = st.nextToken();
-              int DX = Integer.parseInt(st.nextToken());
-                 int DY = Integer.parseInt(st.nextToken());
-        QuestEvent s = new QuestEvent(x, y,questType, questName,questDisctription,expGained,reward,DX,DY);
+        String questDisctription = st.nextToken();
+        int expGained = Integer.parseInt(st.nextToken());
+        String reward = st.nextToken();
+        int DX = Integer.parseInt(st.nextToken());
+        int DY = Integer.parseInt(st.nextToken());
+        QuestEvent s = new QuestEvent(x, y, questType, questName, questDisctription, expGained, reward, DX, DY);
         events.add(s);
     }
 
@@ -578,7 +637,7 @@ public class Map implements Common, Serializable {
         DoorEvent d = new DoorEvent(x, y);
         events.add(d);
     }
-    
+
     private void makeTriggerEvent(StringTokenizer st) {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
@@ -596,7 +655,7 @@ public class Map implements Common, Serializable {
         MoveEvent m = new MoveEvent(x, y, chipNo, destMapNo, destX, destY);
         events.add(m);
     }
-    
+
     private void makeSaveEvent(StringTokenizer st) {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
@@ -613,16 +672,21 @@ public class Map implements Common, Serializable {
         }
     }
     
+    public void setPanel(MainPanel panel) {
+        this.panel = panel;
+    }
+
     private void drawHealthBar(Character c, Graphics g, int offsetX, int offsetY) {
-        if(c.isAttacked()){
+        if (c.isAttacked()) {
             g.setColor(Color.BLACK);
             g.fillRect(healthBarBackround.x + c.getPX() - offsetX, healthBarBackround.y + c.getPY() - offsetY, healthBarBackround.width, healthBarBackround.height);
             g.setColor(Color.RED);
-            g.fillRect(healthBar.x + c.getPX()- offsetX, healthBar.y + c.getPY() - offsetY, (int) (healthBar.width * c.getHealthProportions()), healthBar.height);
+            g.fillRect(healthBar.x + c.getPX() - offsetX, healthBar.y + c.getPY() - offsetY, (int) (healthBar.width * c.getHealthProportions()), healthBar.height);
         }
     }
-    
+
     private class AttackDamageThread extends Thread implements Serializable {
+
         public void run() {
             while (true) {
                 attack:
@@ -634,35 +698,40 @@ public class Map implements Common, Serializable {
                         // The try-catch prevents the thread from crashing and therefore continuing to work.
                         try {
                             Attack a = attacks.get(j);
-                        
-                            
+
                             if (!a.getCharacter().getIsHero()) {
                                 // When the character is not the hero, they can only attack the hero.
-                                if ( c.getHitbox().contains( new Point(a.getPX(), a.getPY()) ) && c.isDamageable() && a.getCharacter()!=c && c.getIsHero()) {
+                                if (c.getHitbox().contains(new Point(a.getPX(), a.getPY())) && c.isDamageable() && a.getCharacter() != c && c.getIsHero()) {
                                     c.damage(a.getWeapon().getDamage());
                                     c.setAttacked(true);
                                     a.removeAttack();
                                     break attack;
                                 }
-                            } else{
-                                // When the character is the hero, they can attack all attackable characters.
-                                if ( c.getHitbox().contains( new Point(a.getPX(), a.getPY()) ) && c.isDamageable() && a.getCharacter()!=c) {
-                                    c.damage(a.getWeapon().getDamage());
-                                    c.setAttacked(true);
-                                    a.removeAttack();
-                                    break attack;
-                                }
+                            } else // When the character is the hero, they can attack all attackable characters.
+                            if (c.getHitbox().contains(new Point(a.getPX(), a.getPY())) && c.isDamageable() && a.getCharacter() != c) {
+                                c.damage(a.getWeapon().getDamage());
+                                c.setAttacked(true);
+                                a.removeAttack();
+                                break attack;
                             }
                         } catch (Exception e) {
+                            LOGGER.log(Level.INFO, e.toString(), e);
                             System.err.println("Attack disappeared while checking:\n\t" + e);
                         }
                     }
                 }
-                
+
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, e.toString(), e);
+
+                    try {
+                        CrashReport cr = new CrashReport(e);
+                        cr.show();
+                    } catch (Exception n) {
+                        // do nothing
+                    }
                 }
             }
         }

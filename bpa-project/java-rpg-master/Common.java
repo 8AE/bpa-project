@@ -1,4 +1,6 @@
+
 public interface Common {
+
     // direction
     public static final int DOWN = 0;
     public static final int LEFT = 1;

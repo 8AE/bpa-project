@@ -1,12 +1,19 @@
+
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
 import javax.sound.midi.*;
+import javax.swing.JOptionPane;
 
 public class MidiEngine implements MetaEventListener {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     private static final int END_OF_TRACK = 47;
 
-    private Sequencer sequencer;
-    private Synthesizer synthesizer;
+    private static Sequencer sequencer;
+    private static Synthesizer synthesizer;
 
     // BGM name -> MIDI sequence
     private HashMap<String, Sequence> midiMap;
@@ -40,7 +47,13 @@ public class MidiEngine implements MetaEventListener {
                 synthesizer = (Synthesizer) sequencer;
             }
         } catch (MidiUnavailableException e) {
-            e.printStackTrace();
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         }
     }
 
@@ -55,9 +68,21 @@ public class MidiEngine implements MetaEventListener {
                     getClass().getResource(filename));
             midiMap.put(name, seq);
         } catch (InvalidMidiDataException e) {
-            e.printStackTrace();
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         }
     }
 
@@ -66,14 +91,20 @@ public class MidiEngine implements MetaEventListener {
             return;
         }
         stop();
-        Sequence seq = (Sequence)midiMap.get(name);
+        Sequence seq = (Sequence) midiMap.get(name);
         if (sequencer != null && seq != null) {
             try {
                 sequencer.setSequence(seq);
                 sequencer.start();
                 currentSequenceName = name;
             } catch (InvalidMidiDataException e) {
-                e.printStackTrace();
+
+                try {
+                    CrashReport cr = new CrashReport(e);
+                    cr.show();
+                } catch (Exception n) {
+                    // do nothing
+                }
             }
         }
     }
@@ -99,4 +130,5 @@ public class MidiEngine implements MetaEventListener {
             }
         }
     }
+
 }

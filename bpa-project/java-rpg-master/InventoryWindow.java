@@ -1,15 +1,26 @@
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  * Created by hpro1 on 11/22/16.
  */
 public class InventoryWindow implements Common, Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     // constants of inventory
     private static final int EDGE_WIDTH = 2;
     private static final int INV_START = 65;
@@ -19,12 +30,12 @@ public class InventoryWindow implements Common, Serializable {
 
     // constants of special commands for opening inventory
     public static final int TRASH_ITEM = 0;
-    
+
     // constants for focuses
     private final int MAIN_FOCUS = 0;
     private final int TRASH_FOCUS = 1;
     private final int EQUIPMENT_FOCUS = 2;
-    
+
     // outer frame
     private Rectangle rect;
     // inner frame
@@ -37,7 +48,7 @@ public class InventoryWindow implements Common, Serializable {
     private Rectangle cursorRect;
     // trash
     private Rectangle trashRect;
-    
+
     // is message window visible ?
     private boolean isVisible = false;
 
@@ -45,33 +56,33 @@ public class InventoryWindow implements Common, Serializable {
     private Image cursorImage;
 
     // cursor movement board
-    private Item[][] invBoard = new Item [INV_ROW][INV_COL];
+    private Item[][] invBoard = new Item[INV_ROW][INV_COL];
     private int invBoardX = 0;
     private int invBoardY = 0;
     private int currentFocus = 0;
     private boolean isMoving;
     private int moveLength;
     private Color cursorColor;
-    
+
     // trashing an item
     private boolean isTrashing = false;
     private Item itemOnStandBy = null;
-    
+
     // the engines needed in this class are declared
     private InventoryEngine inventoryEngine;
     private MessageEngine messageEngine;
     private WaveEngine waveEngine;
-    
+
     // Sound Clips needed in the inventory window
     private static final String[] soundNames = {"beep", "boop"};
-    
+
     // the thread for the cursor animation
-    private transient Thread threadAnimation;
+    private static Thread threadAnimation;
 
     public InventoryWindow(Rectangle rect) {
         // The base dimensions of the inventory window
         this.rect = rect;
-        
+
         // The inner dimensions so that there is a boarder
         invInnerRect = new Rectangle(
                 rect.x + EDGE_WIDTH,
@@ -102,13 +113,12 @@ public class InventoryWindow implements Common, Serializable {
 
         // The rectangle for the trash space
         trashRect = new Rectangle(
-                rect.x + INV_SPACE*6,
-                rect.y + INV_SPACE*6,
+                rect.x + INV_SPACE * 6,
+                rect.y + INV_SPACE * 6,
                 INV_SPACE,
                 INV_SPACE
-                
         );
-        
+
         // The engines needed are initialized
         inventoryEngine = new InventoryEngine();
         messageEngine = new MessageEngine();
@@ -116,7 +126,7 @@ public class InventoryWindow implements Common, Serializable {
 
         // load sound clips
         loadSound();
-        
+
         // The inventory board is created
         for (int i = 0; i < invBoard.length; i++) {
             for (int j = 0; j < invBoard[i].length; j++) {
@@ -154,7 +164,7 @@ public class InventoryWindow implements Common, Serializable {
                 g.fillRect(invInnerSquare.x + (i * INV_SPACE), invInnerSquare.y + (j * INV_SPACE), invInnerSquare.width, invInnerSquare.height);
             }
         }
-        
+
         // draw inventory columns
         g.setColor(Color.BLACK);
         for (int i = 0; i < INV_COL; i++) {
@@ -162,32 +172,32 @@ public class InventoryWindow implements Common, Serializable {
                 g.fillRect(invSquare.x + (i * INV_SPACE), invSquare.y + (j * INV_SPACE), invSquare.width, invSquare.height);
             }
         }
-        
+
         // draw trash square
         g.setColor(Color.GREEN);
         g.fillRect(trashRect.x, trashRect.y, trashRect.width, trashRect.height);
 
         // draw title for the inventory
         messageEngine.drawMessage(74, 134, "INVENTORY", g);
-        
+
         // draw the cursor depending on the focus it is in
         if (currentFocus == MAIN_FOCUS) {
             // draw cursor
             cursorColor = Color.YELLOW;
-        
+
             if (isTrashing) {
                 cursorColor = Color.RED;
             }
-        
+
             g.setColor(cursorColor);
             g.fillRect(cursorRect.x + INV_SPACE * invBoardX, cursorRect.y + INV_SPACE * invBoardY, cursorRect.width, cursorRect.height);
-            
+
         } else if (currentFocus == TRASH_FOCUS) {
             //draw cursor
             cursorColor = Color.YELLOW;
             g.setColor(cursorColor);
             g.fillRect(trashRect.x, trashRect.y, trashRect.width, trashRect.height);
-            
+
         }
 
         // draw the item name and description
@@ -195,17 +205,17 @@ public class InventoryWindow implements Common, Serializable {
         if (invBoard[getInvBoardXPos()][getInvBoardYPos()] != null) {
             messageEngine.drawMessage(328, 160, invBoard[getInvBoardXPos()][getInvBoardYPos()].getName(), g);
         }
-        
+
         messageEngine.drawMessage(328, 196, "DESCRIPTION", g);
         if (invBoard[getInvBoardXPos()][getInvBoardYPos()] != null) {
             messageEngine.drawMessage(328, 222, invBoard[getInvBoardXPos()][getInvBoardYPos()].getDescription(), g);
         }
-        
+
         // draw the actual items
         drawItems(g);
 
     }
-    
+
     public void runThread() {
         // run thread
         threadAnimation = new Thread(new InventoryWindow.AnimationThread());
@@ -218,9 +228,10 @@ public class InventoryWindow implements Common, Serializable {
     public void show() {
         isVisible = true;
     }
-    
+
     /**
      * The inventory window appears with a special command.
+     *
      * @param specialCommand The command you want the window to open with.
      * @param item The item that is brought into the inventory with the command.
      */
@@ -244,6 +255,7 @@ public class InventoryWindow implements Common, Serializable {
 
     /**
      * Is the inventory visible?
+     *
      * @return if the window is visible.
      */
     public boolean isVisible() {
@@ -252,6 +264,7 @@ public class InventoryWindow implements Common, Serializable {
 
     /**
      * Move the character in the declared direction.
+     *
      * @param direction The direction that the cursor is moving.
      */
     public void setDirection(int direction) {
@@ -309,7 +322,9 @@ public class InventoryWindow implements Common, Serializable {
     }
 
     /**
-     * Checks if the cursor can move left by checking if the position is above zero.
+     * Checks if the cursor can move left by checking if the position is above
+     * zero.
+     *
      * @return whether or not the cursor can move left.
      */
     private boolean canMoveLeft() {
@@ -317,7 +332,9 @@ public class InventoryWindow implements Common, Serializable {
     }
 
     /**
-     * Checks if the cursor can move right by checking if the position is below row count.
+     * Checks if the cursor can move right by checking if the position is below
+     * row count.
+     *
      * @return whether or not the cursor can move right.
      */
     private boolean canMoveRight() {
@@ -325,7 +342,9 @@ public class InventoryWindow implements Common, Serializable {
     }
 
     /**
-     * Checks if the cursor can move up by checking if the position is above zero.
+     * Checks if the cursor can move up by checking if the position is above
+     * zero.
+     *
      * @return whether or not the cursor can move up.
      */
     private boolean canMoveUp() {
@@ -333,7 +352,9 @@ public class InventoryWindow implements Common, Serializable {
     }
 
     /**
-     * Checks if the cursor can move down by checking if the position is below the column count.
+     * Checks if the cursor can move down by checking if the position is below
+     * the column count.
+     *
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveDown() {
@@ -341,8 +362,8 @@ public class InventoryWindow implements Common, Serializable {
     }
 
     /**
-     * Move the cursor to the next focused section. When it reaches the max number of focuses,
-     * it returns back to the beginning to recycle.
+     * Move the cursor to the next focused section. When it reaches the max
+     * number of focuses, it returns back to the beginning to recycle.
      */
     public void nextFocus() {
         if (currentFocus <= 1) {
@@ -351,9 +372,10 @@ public class InventoryWindow implements Common, Serializable {
             currentFocus = 0;
         }
     }
-    
+
     /**
      * Check if the cursor is currently moving.
+     *
      * @return whether or not the cursor is moving.
      */
     public boolean isMoving() {
@@ -362,7 +384,9 @@ public class InventoryWindow implements Common, Serializable {
 
     /**
      * Set whether or not the cursor is moving.
-     * @param isMoving true for if it is moving and false for if it is not moving. 
+     *
+     * @param isMoving true for if it is moving and false for if it is not
+     * moving.
      */
     public void setMoving(boolean isMoving) {
         this.isMoving = isMoving;
@@ -371,7 +395,9 @@ public class InventoryWindow implements Common, Serializable {
 
     /**
      * Draw the items in the inventory to the screen.
-     * @param g get the graphics class that is printing everything to the screen.
+     *
+     * @param g get the graphics class that is printing everything to the
+     * screen.
      */
     private void drawItems(Graphics g) {
         for (int i = 0; i < invBoard.length; i++) {
@@ -383,20 +409,31 @@ public class InventoryWindow implements Common, Serializable {
 
     /**
      * Get the Item the cursor is currently on.
+     *
      * @return the current Item the cursor is on.
      */
-    public Item getInvBoardPosItem() { return invBoard[invBoardX][invBoardY]; }
+    public Item getInvBoardPosItem() {
+        return invBoard[invBoardX][invBoardY];
+    }
 
     /**
      * Get the X position of the inventory board that the cursor is on.
+     *
      * @return The x-value in terms of a coordinate grind.
      */
-    public int getInvBoardXPos() { return invBoardY; } // These are opposite on purpose.
-                                                       // The items' positions are backwards from
-    public int getInvBoardYPos() { return invBoardX; } // the traditional cartesian coordinate plain.
-    
+    public int getInvBoardXPos() {
+        return invBoardY;
+    } // These are opposite on purpose.
+    // The items' positions are backwards from
+
+    public int getInvBoardYPos() {
+        return invBoardX;
+    } // the traditional cartesian coordinate plain.
+
     /**
-     * Add an item to the inventory in the first free space available and then exit the method.
+     * Add an item to the inventory in the first free space available and then
+     * exit the method.
+     *
      * @param item the Item to be added into the inventory.
      */
     public void add(Item item) {
@@ -409,11 +446,14 @@ public class InventoryWindow implements Common, Serializable {
             }
         }
     }
-    
+
     /**
      * Delete an item in the selected position.
-     * @param posX the x position of the board the item in question is located in.
-     * @param posY the y position of the board the item in question is located in.
+     *
+     * @param posX the x position of the board the item in question is located
+     * in.
+     * @param posY the y position of the board the item in question is located
+     * in.
      */
     public void delete(int posX, int posY) {
         // Set the item in question to whatever the temporary item is.
@@ -423,12 +463,12 @@ public class InventoryWindow implements Common, Serializable {
         invBoard[posX][posY] = itemOnStandBy;
         itemOnStandBy = null; // Set the temporary item back to null.
     }
-    
+
     /**
      * Perform an action depending on the cursor's position and current focus.
      */
     public void select() {
-        if (isTrashing) { 
+        if (isTrashing) {
             // If the cursor is in trash mode, it will delete the item it is currently on.
             delete(getInvBoardXPos(), getInvBoardYPos());
             isTrashing = false;
@@ -442,7 +482,9 @@ public class InventoryWindow implements Common, Serializable {
 
     /**
      * Check if the inventory is full.
-     * @return whether or not it is full. True means it is, false means it is now.
+     *
+     * @return whether or not it is full. True means it is, false means it is
+     * now.
      */
     public boolean isFull() {
         for (int i = 0; i < invBoard.length; i++) {
@@ -454,7 +496,7 @@ public class InventoryWindow implements Common, Serializable {
         }
         return true;
     }
-    
+
     /**
      * Load the sounds.
      */
@@ -464,18 +506,27 @@ public class InventoryWindow implements Common, Serializable {
             waveEngine.load(soundName, "sound/" + soundName + ".wav");
         }
     }
-    
+
     /**
-     * This thread manages the animation of the cursor so that it moves a normal speed.
+     * This thread manages the animation of the cursor so that it moves a normal
+     * speed.
      */
     private class AnimationThread extends Thread {
+
         public void run() {
             while (true) {
                 isMoving = false; // Set movement to false
                 try {
                     Thread.sleep(300); // Wait 0.3 seconds.
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOGGER.log(Level.SEVERE, e.toString(), e);
+
+                    try {
+                        CrashReport cr = new CrashReport(e);
+                        cr.show();
+                    } catch (Exception n) {
+                        // do nothing
+                    }
                 }
             }
         }

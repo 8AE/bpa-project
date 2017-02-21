@@ -1,15 +1,24 @@
+
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.Character;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 // in this class, Character does not mean Player!
-
 public class MessageEngine implements Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     // font size
     public static final int FONT_WIDTH = 16;
     public static final int FONT_HEIGHT = 22;
@@ -62,14 +71,14 @@ public class MessageEngine implements Serializable {
             return;
         }
         g.drawImage(fontImage,
-                    x,
-                    y,
-                    x + FONT_WIDTH,
-                    y + FONT_HEIGHT,
-                    pos.x + color,
-                    pos.y,
-                    pos.x + color + FONT_WIDTH,
-                    pos.y + FONT_HEIGHT, null);
+                x,
+                y,
+                x + FONT_WIDTH,
+                y + FONT_HEIGHT,
+                pos.x + color,
+                pos.y,
+                pos.x + color + FONT_WIDTH,
+                pos.y + FONT_HEIGHT, null);
     }
 
     private void createHash() {
@@ -115,10 +124,11 @@ public class MessageEngine implements Serializable {
         characterPos.put(new Character('X'), new Point(48, 418));
         characterPos.put(new Character('Y'), new Point(64, 418));
         characterPos.put(new Character('Z'), new Point(80, 418));
-        
+
         // Punctuation
         characterPos.put(new Character('!'), new Point(96, 418));
         characterPos.put(new Character('?'), new Point(112, 418));
-        characterPos.put(new Character(' '),  new Point(64, 198));
+        characterPos.put(new Character(' '), new Point(64, 198));
     }
+
 }

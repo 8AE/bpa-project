@@ -1,8 +1,16 @@
+
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sound.sampled.*;
+import javax.swing.JOptionPane;
 
 public class WaveEngine implements LineListener {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     // Sound name -> Sound clip
     private HashMap<String, Clip> clipMap;
 
@@ -53,16 +61,37 @@ public class WaveEngine implements LineListener {
             clipMap.put(name, clip);
             stream.close();
         } catch (UnsupportedAudioFileException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.toString(), e);
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.toString(), e);
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         } catch (LineUnavailableException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, e.toString(), e);
+
+            try {
+                CrashReport cr = new CrashReport(e);
+                cr.show();
+            } catch (Exception n) {
+                // do nothing
+            }
         }
     }
 
     public void play(String name) {
-        Clip clip = (Clip)clipMap.get(name);
+        Clip clip = (Clip) clipMap.get(name);
         if (clip != null) {
             clip.start();
         }
@@ -75,4 +104,5 @@ public class WaveEngine implements LineListener {
             clip.setFramePosition(0);
         }
     }
+
 }

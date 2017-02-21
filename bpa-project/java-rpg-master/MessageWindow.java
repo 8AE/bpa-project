@@ -1,10 +1,18 @@
+
 import java.awt.*;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import javax.swing.*;
 import java.util.*;
 import java.util.Timer;
+import java.util.logging.Logger;
 
 public class MessageWindow implements Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     // width of white border
     private static final int EDGE_WIDTH = 2;
 
@@ -32,11 +40,15 @@ public class MessageWindow implements Serializable {
     private int curPage = 0;
     private int curPos;
     private boolean nextFlag = false;
-    
-    private MessageEngine messageEngine;
 
-    private Timer timer;
-    private TimerTask task;
+    private MessageEngine messageEngine;
+    private WaveEngine waveEngine;
+    
+    // Sound Clips needed in the inventory window
+    private static final String[] soundNames = {"beep"};
+
+    private static Timer timer;
+    private static TimerTask task;
 
     public MessageWindow(Rectangle rect) {
         this.rect = rect;
@@ -53,7 +65,11 @@ public class MessageWindow implements Serializable {
                 120);
 
         messageEngine = new MessageEngine();
+        waveEngine = new WaveEngine();
 
+        // load sound clips
+        loadSound();
+        
         // load cursor image
         ImageIcon icon = new ImageIcon(getClass().getResource("image/cursor.gif"));
         cursorImage = icon.getImage();
@@ -73,7 +89,7 @@ public class MessageWindow implements Serializable {
         // draw inner rect
         g.setColor(Color.BLACK);
         g.fillRect(innerRect.x, innerRect.y,
-                   innerRect.width, innerRect.height);
+                innerRect.width, innerRect.height);
 
         // draw a current page
         for (int i = 0; i < curPos; i++) {
@@ -82,17 +98,13 @@ public class MessageWindow implements Serializable {
             int dy = textRect.y + (LINE_HEIGHT + MessageEngine.FONT_HEIGHT) * (i / MAX_CHAR_PER_LINE);
             messageEngine.drawCharacter(dx, dy, c, g);
         }
-        
+
         // draw a cursor if the current page is not the last page
         if (curPage < maxPage && nextFlag) {
             int dx = textRect.x + (MAX_CHAR_PER_LINE / 2) * MessageEngine.FONT_WIDTH - 8;
             int dy = textRect.y + (LINE_HEIGHT + MessageEngine.FONT_HEIGHT) * 3;
             g.drawImage(cursorImage, dx, dy, null);
         }
-    }
-    
-    public void runThread() {
-        
     }
 
     public void setMessage(String msg) {
@@ -101,12 +113,12 @@ public class MessageWindow implements Serializable {
         nextFlag = false;
 
         System.out.println(msg);
-        
+
         // initialize
-        for (int i=0; i<text.length; i++) {
+        for (int i = 0; i < text.length; i++) {
             text[i] = ' ';
         }
-        
+
         int p = 0;  // current position
         for (int i = 0; i < msg.length(); i++) {
             char c = msg.charAt(i);
@@ -118,7 +130,7 @@ public class MessageWindow implements Serializable {
                     break;
                 case '|':
                     // new page
-                    p += MAX_CHAR_PER_PAGE; 
+                    p += MAX_CHAR_PER_PAGE;
                     p = (p / MAX_CHAR_PER_PAGE) * MAX_CHAR_PER_PAGE;
                     break;
                 default:
@@ -126,13 +138,13 @@ public class MessageWindow implements Serializable {
                     break;
             }
         }
-        
+
         maxPage = p / MAX_CHAR_PER_PAGE;
 
         task = new FlowingMessageTask();
         timer.schedule(task, 0L, 20L);
     }
-    
+
     public boolean nextPage() {
         if (curPage == maxPage) {
             task.cancel();
@@ -140,6 +152,7 @@ public class MessageWindow implements Serializable {
             return true;
         }
         if (nextFlag) {
+            waveEngine.play("beep");
             curPage++;
             curPos = 0;
             nextFlag = false;
@@ -150,7 +163,7 @@ public class MessageWindow implements Serializable {
     public void show() {
         isVisible = true;
     }
-    
+
     public void hide() {
         isVisible = false;
     }
@@ -158,8 +171,19 @@ public class MessageWindow implements Serializable {
     public boolean isVisible() {
         return isVisible;
     }
+    
+    /**
+     * Load the sounds.
+     */
+    private void loadSound() {
+        // load sound clip files
+        for (String soundName : soundNames) {
+            waveEngine.load(soundName, "sound/" + soundName + ".wav");
+        }
+    }
 
     class FlowingMessageTask extends TimerTask implements Serializable {
+
         public void run() {
             if (!nextFlag) {
                 curPos++;

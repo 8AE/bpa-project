@@ -1,17 +1,27 @@
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.swing.ImageIcon;
 import java.util.List;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  * Created by Ahmad El-baba on 1/3/2017.
  */
 public class QuestWindow implements Common {
 
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     MessageEngine messageEngine;
     QuestEngine questEngine;
-    
+
     List<Quest> questList = new ArrayList();
 
     // width of white border
@@ -23,7 +33,7 @@ public class QuestWindow implements Common {
 
     private final int QUEST_SLOT_SPACING = 40;
 
-    private Thread threadAnimation;
+    private static Thread threadAnimation;
 
     // outer frame
     private Rectangle boarder;
@@ -70,35 +80,32 @@ public class QuestWindow implements Common {
         // drawing quest titles
         if (!questList.isEmpty()) {
             for (int i = 0; i < questList.size(); i++) {
-                try{
-                  for (int c = 0; c <13; c++) {
-               if (questList.get(i).questFinished) {
-                  
-               
-                   messageEngine.setColor(messageEngine.GREEN);
-                         messageEngine.drawMessage(c*15+70, 140 + i * 40, String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
-                } else {
-                    messageEngine.setColor(messageEngine.WHITE);
-                         messageEngine.drawMessage(c*15+70, 140 + i * 40,String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
+                try {
+                    for (int c = 0; c < 13; c++) {
+                        if (questList.get(i).questFinished) {
+
+                            messageEngine.setColor(messageEngine.GREEN);
+                            messageEngine.drawMessage(c * 15 + 70, 140 + i * 40, String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
+                        } else {
+                            messageEngine.setColor(messageEngine.WHITE);
+                            messageEngine.drawMessage(c * 15 + 70, 140 + i * 40, String.valueOf(questList.get(i).getQuestName().charAt(c)), g);
+                        }
+
+                        if (cursor.contains(70, 140 + i * 40)) {
+
+                            g.setColor(Color.white);
+                            messageEngine.setColor(messageEngine.WHITE);
+                            messageEngine.drawMessage(300, 140, questList.get(questBoardSpot).getQuestDisctription(), g);
+                            messageEngine.drawMessage(300, 410, "REWARD " + String.valueOf(questList.get(questBoardSpot).getReward()), g);
+                        }
+                    }
+                } catch (Exception e) {
+
                 }
-           
-      
-               
-                
-         
-                if (cursor.contains(70, 140 + i * 40)) {
-                    
-                    g.setColor(Color.white);
-                      messageEngine.setColor(messageEngine.WHITE);
-                    messageEngine.drawMessage(300, 140, questList.get(questBoardSpot).getQuestDisctription(), g);
-                    messageEngine.drawMessage(300, 410, "REWARD " + String.valueOf(questList.get(questBoardSpot).getReward()), g);
-                }   
-                  }    
-                } catch(Exception e){}
             }
         }
     }
-    
+
     public void runThread() {
         // run thread
         threadAnimation = new Thread(new QuestWindow.AnimationThread());
@@ -106,15 +113,15 @@ public class QuestWindow implements Common {
     }
 
     public void addQuest(QuestEvent questEvent) {
-        questList.add(new Quest(questEvent.getQuestType(),questEvent.getQuestName(), questEvent.getQuestDisctription(), questEvent.getExp(), questEvent.getReward()));
+        questList.add(new Quest(questEvent.getQuestType(), questEvent.getQuestName(), questEvent.getQuestDisctription(), questEvent.getExp(), questEvent.getReward()));
         questEngine.chooseType(questList.get(questList.size() - 1), questEvent);
     }
-    
+
     public List<Quest> getQuests() {
         return questList;
     }
-    
-     public void sendQuestList(List<Quest> quests) {
+
+    public void sendQuestList(List<Quest> quests) {
         this.questList = quests;
     }
 
@@ -145,14 +152,11 @@ public class QuestWindow implements Common {
                     if (canMoveUp()) {
                         //waveEngine.play("beep");
                         questBoardSpot--;
-                    } else {
-                        if (questList.size() == 0) {
+                    } else if (questList.size() == 0) {
                         questBoardSpot = questList.size();
-                        } else {
-                            questBoardSpot = questList.size() - 1;
-                        }
-                        //waveEngine.play("boop");
-                    }
+                    } else {
+                        questBoardSpot = questList.size() - 1;
+                    } //waveEngine.play("boop");
                 }
                 isMoving = false;
                 break;
@@ -162,17 +166,21 @@ public class QuestWindow implements Common {
     public void hide() {
         isVisible = false;
     }
-    
+
     /**
-     * Checks if the cursor can move down by checking if the position is below the column count.
+     * Checks if the cursor can move down by checking if the position is below
+     * the column count.
+     *
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveDown() {
         return (questBoardSpot < questList.size() - 1);
     }
-    
+
     /**
-     * Checks if the cursor can move down by checking if the position is below the column count.
+     * Checks if the cursor can move down by checking if the position is below
+     * the column count.
+     *
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveUp() {

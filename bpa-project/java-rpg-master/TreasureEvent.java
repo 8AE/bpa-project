@@ -1,7 +1,16 @@
+
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 public class TreasureEvent extends Event implements Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     private String itemName;
 
     public TreasureEvent(int x, int y, String itemName) {
@@ -28,8 +37,9 @@ public class TreasureEvent extends Event implements Serializable {
 
         return (Integer) dict.get(itemName);
     }
-    
+
     public Item toItem() {
         return new Item("ITEM", "ITEM DESC", 2);
     }
+
 }

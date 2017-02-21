@@ -1,79 +1,83 @@
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Logger;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  * Created by Ahmad El-baba on 11/29/2016.
  */
+public class HudWindow implements Common, Serializable {
 
-public class HudWindow implements Common {
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 
     //healthBar
-    private Rectangle healthBarBackround;
-    private Rectangle healthBar;
+    private static Rectangle healthBarBackround;
+    private static Rectangle healthBar;
     //healthBar outline
-    private Rectangle outerHealthBar;
+    private static Rectangle outerHealthBar;
     //Ultimate Bar
-    private Rectangle ultamateBar;
+    private static Rectangle ultamateBar;
     //Ultimate Bar outline
-    private Rectangle outerUltamateBar;
+    private static Rectangle outerUltamateBar;
     //Left Hand Box
-    private Rectangle leftBox;
+    private static Rectangle leftBox;
     //Left Hand Box outline
-    private Rectangle outerLeftBox;
+    private static Rectangle outerLeftBox;
     //right Hand Box
-    private Rectangle rightBox;
+    private static Rectangle rightBox;
     //right Hand Box outline
-    private Rectangle outerRightBox;
+    private static Rectangle outerRightBox;
     //Item Box
-    private Rectangle itemBox;
+    private static Rectangle itemBox;
     //Item Box outline
-    private Rectangle outerItemBox;
+    private static Rectangle outerItemBox;
 
-    private Rectangle backround;
+    private static Rectangle backround;
 
     //Message Engine
-    private MessageEngine messageEngine;
-    
+    private static MessageEngine messageEngine;
+
     private double health;
-    
-    
-    
 
     public HudWindow() {
         messageEngine = new MessageEngine();
-        backround = new Rectangle(0,0,640,128);
+        backround = new Rectangle(0, 0, 640, 128);
 
-        healthBarBackround = new Rectangle(34 , 34 , 220, 28 );
-         healthBar = new Rectangle(34 , 34 , 220, 28 );
-        outerHealthBar = new Rectangle(32 , 32 , 224, 32 );
+        healthBarBackround = new Rectangle(34, 34, 220, 28);
+        healthBar = new Rectangle(34, 34, 220, 28);
+        outerHealthBar = new Rectangle(32, 32, 224, 32);
 
         /*ultamateBar = new Rectangle(34 , 34 , 220, 28 );
         outerUltamateBar = new Rectangle(32 , 32 , 224, 32 );*/
+        itemBox = new Rectangle(290, 34, 60, 60);
+        outerItemBox = new Rectangle(288, 32, 64, 64);
 
-        itemBox = new Rectangle(290 , 34 , 60, 60 );
-        outerItemBox = new Rectangle(288 , 32 , 64, 64 );
+        rightBox = new Rectangle(482, 34, 60, 60);
+        outerRightBox = new Rectangle(480, 32, 64, 64);
 
-        rightBox = new Rectangle(482 , 34 , 60, 60 );
-        outerRightBox = new Rectangle(480 , 32 , 64, 64 );
-
-        leftBox = new Rectangle(418 , 34 , 60, 60 );
-        outerLeftBox = new Rectangle(416 , 32 , 64, 64 );
+        leftBox = new Rectangle(418, 34, 60, 60);
+        outerLeftBox = new Rectangle(416, 32, 64, 64);
 
     }
-public void updateHealth(int health){
-   this.health = health/100.0;
-   
-   
-    
-    
-}
+
+    public void updateHealth(int health) {
+        this.health = health / 100.0;
+
+    }
+
     public void draw(Graphics g) {
         // draw outer rect
         g.setColor(Color.BLACK);
         g.fillRect(backround.x, backround.y, backround.width, backround.height);
-        
+
         g.setColor(Color.WHITE);
         g.fillRect(outerHealthBar.x, outerHealthBar.y, outerHealthBar.width, outerHealthBar.height);
         //g.fillRect(outerUltamateBar.x, outerUltamateBar.y, outerUltamateBar.width, outerUltamateBar.height);
@@ -93,7 +97,8 @@ public void updateHealth(int health){
         g.fillRect(rightBox.x, rightBox.y, rightBox.width, rightBox.height);
         g.fillRect(leftBox.x, leftBox.y, leftBox.width, leftBox.height);
 
-         g.setColor(Color.RED);
-                    g.fillRect(healthBar.x, healthBar.y, (int)(healthBar.width *health), healthBar.height);
+        g.setColor(Color.RED);
+        g.fillRect(healthBar.x, healthBar.y, (int) (healthBar.width * health), healthBar.height);
     }
+
 }

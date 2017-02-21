@@ -1,22 +1,32 @@
+
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  * Created by hpro1 on 11/29/16.
  */
-public class InventoryEngine implements Common, Serializable{
+public class InventoryEngine implements Common, Serializable {
+
+    private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
+
     // chipset dimensions of items
     public static final int ITEM_WIDTH = CS;
     public static final int ITEM_HEIGHT = CS;
 
     // item scaling for inventory
     public static final double ITEM_SCALE = 1.5;
-    
+
     // item image
     private Image itemsImage;
     // items position
@@ -40,13 +50,13 @@ public class InventoryEngine implements Common, Serializable{
             g.drawImage(itemsImage,
                     x,
                     y,
-                    (int)((x + ITEM_WIDTH * ITEM_SCALE) - 2),
-                    (int)((y + ITEM_HEIGHT * ITEM_SCALE) - 2),
+                    (int) ((x + ITEM_WIDTH * ITEM_SCALE) - 2),
+                    (int) ((y + ITEM_HEIGHT * ITEM_SCALE) - 2),
                     pos.x,
                     pos.y,
                     pos.x + ITEM_WIDTH,
                     pos.y + ITEM_HEIGHT, null);
-            }
+        }
     }
 
     private void createHash() {
@@ -66,4 +76,5 @@ public class InventoryEngine implements Common, Serializable{
         itemPos.put(new Integer(12), new Point(128, 32));
         //TODO: Set sprite positions and the points... need to know how many sprite per row
     }
+
 }

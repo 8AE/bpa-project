@@ -1,6 +1,8 @@
+
 import java.io.Serializable;
 
 public abstract class Event implements Serializable {
+
     protected int x;
     protected int y;
     protected int id;
