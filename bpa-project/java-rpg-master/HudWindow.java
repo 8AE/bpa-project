@@ -60,7 +60,7 @@ public class HudWindow implements Common, Serializable {
         itemBox = new Rectangle(290 , 34 , 60, 60 );
         outerItemBox = new Rectangle(288 , 32 , 64, 64 );
         
-        ImageIcon icon = new ImageIcon(getClass().getResource("image/mapchip.gif"));
+        ImageIcon icon = new ImageIcon(getClass().getResource("image/mapchip.png"));
         itemsImage = icon.getImage();
         
     }

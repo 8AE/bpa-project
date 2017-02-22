@@ -1,18 +1,11 @@
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
-import javax.swing.JOptionPane;
-
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -71,7 +64,7 @@ class Attack implements Common, Serializable {
 
         // the weaponchip is loaded if it has not already
         if (image == null) {
-            loadImage("image/mapchip.gif");
+            loadImage("image/weapontier1.png");
         }
 
         waveEngine = new WaveEngine();
@@ -94,9 +87,9 @@ class Attack implements Common, Serializable {
                 px + CS - offsetX,
                 py + CS - offsetY,
                 cx,
-                cy,//+ direction * CS,
+                cy + direction * CS,
                 cx + CS,
-                cy + CS,// + direction * CS,
+                cy + CS + direction * CS,
                 null);
     }
 

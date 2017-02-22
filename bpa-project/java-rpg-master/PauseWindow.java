@@ -1,3 +1,4 @@
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -5,15 +6,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import java.util.List;
+
 /**
  * Created by Ahmad El-baba on 1/3/2017.
  */
-public class PauseWindow implements Common,Serializable {
+public class PauseWindow implements Common, Serializable {
 
     MessageEngine messageEngine;
-
-    
-  
 
     // width of white border
     private static final int EDGE_WIDTH = 2;
@@ -25,11 +24,10 @@ public class PauseWindow implements Common,Serializable {
     private final int PAUSE_SLOT_SPACING = 40;
 
     private Thread threadAnimation;
-    
-    
-   private WaveEngine waveEngine;
-        private static final String[] soundNames = {"beep", "boop"};
-        
+
+    private WaveEngine waveEngine;
+    private static final String[] soundNames = {"beep", "boop"};
+
     // outer frame
     private Rectangle boarder;
     // inner frame
@@ -41,7 +39,9 @@ public class PauseWindow implements Common,Serializable {
     public PauseWindow(Rectangle rect) {
         messageEngine = new MessageEngine();
 
-          waveEngine = new WaveEngine();
+        waveEngine = new WaveEngine();
+        loadSound();
+        
         cursor = new Rectangle(295, 244, 100, 28);
         this.boarder = rect;
         innerRect = new Rectangle(
@@ -56,7 +56,7 @@ public class PauseWindow implements Common,Serializable {
     }
 
     public void draw(Graphics g) {
-        
+
         if (isVisible == false) {
             return;
         }
@@ -68,27 +68,20 @@ public class PauseWindow implements Common,Serializable {
         messageEngine.setColor(messageEngine.WHITE);
         g.setColor(Color.WHITE);
         messageEngine.drawMessage(300, 200, "PAUSE", g);
-     
-    
-    messageEngine.drawMessage(295, 244 , "RESUME", g);
-      messageEngine.drawMessage(295, 284, "SAVE", g);
-      messageEngine.drawMessage(295, 324, "QUIT", g);
 
+        messageEngine.drawMessage(295, 244, "RESUME", g);
+        messageEngine.drawMessage(295, 284, "SAVE", g);
+        messageEngine.drawMessage(295, 324, "QUIT", g);
 
         g.drawRect(cursor.x, cursor.y + PAUSE_SLOT_SPACING * pauseBoardSpot, cursor.width, cursor.height);
 
-   
-     
-      
-        
     }
-    
+
     public void runThread() {
         // run thread
         threadAnimation = new Thread(new PauseWindow.AnimationThread());
         threadAnimation.start();
     }
-
 
     public void show() {
         isVisible = true;
@@ -118,7 +111,7 @@ public class PauseWindow implements Common,Serializable {
                         waveEngine.play("beep");
                         pauseBoardSpot--;
                     } else {
-                     pauseBoardSpot = 2;
+                        pauseBoardSpot = 2;
                         waveEngine.play("boop");
                     }
                 }
@@ -130,17 +123,21 @@ public class PauseWindow implements Common,Serializable {
     public void hide() {
         isVisible = false;
     }
-    
+
     /**
-     * Checks if the cursor can move down by checking if the position is below the column count.
+     * Checks if the cursor can move down by checking if the position is below
+     * the column count.
+     *
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveDown() {
         return (pauseBoardSpot <= 1);
     }
-    
+
     /**
-     * Checks if the cursor can move down by checking if the position is below the column count.
+     * Checks if the cursor can move down by checking if the position is below
+     * the column count.
+     *
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveUp() {
@@ -163,6 +160,14 @@ public class PauseWindow implements Common,Serializable {
         return pauseBoardSpot;
     }
 
+    private void loadSound() {
+        
+        // load sound clip files
+        for (String soundName : soundNames) {
+            waveEngine.load(soundName, "sound/" + soundName + ".wav");
+        }
+    }
+    
     private class AnimationThread extends Thread {
 
         public void run() {

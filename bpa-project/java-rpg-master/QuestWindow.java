@@ -47,7 +47,6 @@ public class QuestWindow implements Common,Serializable {
     private Rectangle cursor;
     
     private WaveEngine waveEngine;
-    private MidiEngine midiEngine;
     private static final String[] soundNames = {"beep", "boop"};
 
     public QuestWindow(Rectangle rect) {

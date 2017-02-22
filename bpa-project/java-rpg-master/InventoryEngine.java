@@ -34,7 +34,7 @@ public class InventoryEngine implements Common, Serializable {
 
     public InventoryEngine() {
         // load item images
-        ImageIcon icon = new ImageIcon(getClass().getResource("image/mapchip.gif"));
+        ImageIcon icon = new ImageIcon(getClass().getResource("image/mapchip.png"));
         itemsImage = icon.getImage();
 
         itemPos = new HashMap<Integer, Point>();

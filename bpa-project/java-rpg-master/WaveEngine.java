@@ -56,7 +56,7 @@ public class WaveEngine implements LineListener,Serializable {
                 System.exit(0);
             }
 
-             clip = (Clip) AudioSystem.getLine(info);
+            clip = (Clip) AudioSystem.getLine(info);
             clip.addLineListener(this);
             clip.open(stream);
             clipMap.put(name, clip);
@@ -92,6 +92,7 @@ public class WaveEngine implements LineListener,Serializable {
     }
 
     public void play(String name) {
+        clip.stop();
         Clip clip = (Clip) clipMap.get(name);
         if (clip != null) {
             clip.start();
@@ -111,7 +112,10 @@ public class WaveEngine implements LineListener,Serializable {
         }
         
     }
-// load bgm files
+    
+    public void stop() {
+        clip.stop();
+    }
      
 
 }

@@ -75,7 +75,7 @@ public class Map implements Common, Serializable {
         loadMap(mapFile);
         loadEvent(eventFile);
         if (colorChipSet == null || greyscaleChipSet == null) {
-            loadImage("image/texture_sheet2.png");
+            loadImage("image/mapchip.png");
             makeGreyScale(greyscaleChipSet);
         }
         currentChipSet = colorChipSet;
@@ -144,7 +144,7 @@ public class Map implements Common, Serializable {
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
             if (c.getHealth() <= 0) {
-                panel.CheckifQuestCharacter(c);
+                panel.checkifQuestCharacter(c);
                 removeCharacter(c);
             }
         }
@@ -182,7 +182,25 @@ public class Map implements Common, Serializable {
                 || // wall
                 map[y][x] == 2
                 || // throne
-                map[y][x] == 5) {    // sea
+                map[y][x] == 5
+                || // sea
+                map[y][x] == 6
+                || // lava
+                map[y][x] == 7
+                || // tree
+                map[y][x] == 8
+                || // rock1
+                map[y][x] == 9
+                || // rock2
+                map[y][x] == 19
+                || // brick
+                map[y][x] == 20
+                || // wall1
+                map[y][x] == 21
+                || // wall2
+                map[y][x] == 22
+                || // wall3
+                map[y][x] == 23) {    // wall4
             return true;
         }
 
@@ -617,7 +635,7 @@ public class Map implements Common, Serializable {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
         String itemName = st.nextToken();
-            String itemType = st.nextToken();
+        String itemType = st.nextToken();
         TreasureEvent t = new TreasureEvent(x, y, itemName,itemType);
         events.add(t);
     }
@@ -729,7 +747,12 @@ public class Map implements Common, Serializable {
                             }
                         } catch (Exception e) {
                             LOGGER.log(Level.INFO, e.toString(), e);
-                            System.err.println("Attack disappeared while checking:\n\t" + e);
+                            try {
+                                LogReport lr = new LogReport("Attack disappeared while checking:\n\t" + e);
+                                lr.saveLog();
+                            } catch (IOException ex) {
+                                // do nothing
+                            }
                         }
                     }
                 }

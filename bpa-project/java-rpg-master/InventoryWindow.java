@@ -3,13 +3,16 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
@@ -34,8 +37,9 @@ public class InventoryWindow implements Common, Serializable {
     // constants for focuses
     private final int MAIN_FOCUS = 0;
     private final int TRASH_FOCUS = 1;
-    private final int EQUIPMENT_FOCUS = 2;
 
+    private BufferedImage trashIcon;
+    
     // outer frame
     private Rectangle rect;
     // inner frame
@@ -52,16 +56,12 @@ public class InventoryWindow implements Common, Serializable {
     // is message window visible ?
     private boolean isVisible = false;
 
-    // cursor animation gif
-    private Image cursorImage;
-
     // cursor movement board
     private Item[][] invBoard = new Item[INV_ROW][INV_COL];
     private int invBoardX = 0;
     private int invBoardY = 0;
     private int currentFocus = 0;
     private boolean isMoving;
-    private int moveLength;
     private Color cursorColor;
 
     // trashing an item
@@ -76,13 +76,28 @@ public class InventoryWindow implements Common, Serializable {
     // Sound Clips needed in the inventory window
     private static final String[] soundNames = {"beep", "boop"};
 
+    private static MainPanel panel;
+    
     // the thread for the cursor animation
     private static Thread threadAnimation;
 
-    public InventoryWindow(Rectangle rect) {
+    public InventoryWindow(Rectangle rect, MainPanel panel) {
         // The base dimensions of the inventory window
         this.rect = rect;
+        
+        try {
+            trashIcon = ImageIO.read(getClass().getResource("image/trashcan.png"));
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, e.toString(), e);
 
+                    try {
+                        CrashReport cr = new CrashReport(e);
+                        cr.show();
+                    } catch (Exception n) {
+                        // do nothing
+                    }
+        }
+        
         // The inner dimensions so that there is a boarder
         invInnerRect = new Rectangle(
                 rect.x + EDGE_WIDTH,
@@ -134,10 +149,6 @@ public class InventoryWindow implements Common, Serializable {
             }
         }
 
-        // load cursor image
-        ImageIcon icon = new ImageIcon(getClass().getResource("image/cursor.gif"));
-        cursorImage = icon.getImage();
-
         // run thread
         threadAnimation = new Thread(new InventoryWindow.AnimationThread());
         threadAnimation.start();
@@ -174,9 +185,12 @@ public class InventoryWindow implements Common, Serializable {
         }
 
         // draw trash square
-        g.setColor(Color.GREEN);
-        g.fillRect(trashRect.x, trashRect.y, trashRect.width, trashRect.height);
+        g.drawImage(trashIcon, trashRect.x, trashRect.y, panel);
 
+        
+        // draw the actual items
+        drawItems(g);
+        
         // draw title for the inventory
         messageEngine.drawMessage(74, 134, "INVENTORY", g);
 
@@ -190,13 +204,13 @@ public class InventoryWindow implements Common, Serializable {
             }
 
             g.setColor(cursorColor);
-            g.fillRect(cursorRect.x + INV_SPACE * invBoardX, cursorRect.y + INV_SPACE * invBoardY, cursorRect.width, cursorRect.height);
+            g.drawRect(cursorRect.x + INV_SPACE * invBoardX, cursorRect.y + INV_SPACE * invBoardY, cursorRect.width, cursorRect.height);
 
         } else if (currentFocus == TRASH_FOCUS) {
             //draw cursor
             cursorColor = Color.YELLOW;
             g.setColor(cursorColor);
-            g.fillRect(trashRect.x, trashRect.y, trashRect.width, trashRect.height);
+            g.drawRect(trashRect.x, trashRect.y, trashRect.width, trashRect.height);
 
         }
 
@@ -210,9 +224,6 @@ public class InventoryWindow implements Common, Serializable {
         if (invBoard[getInvBoardXPos()][getInvBoardYPos()] != null) {
             messageEngine.drawMessage(328, 222, invBoard[getInvBoardXPos()][getInvBoardYPos()].getDescription(), g);
         }
-
-        // draw the actual items
-        drawItems(g);
 
     }
 
@@ -366,7 +377,7 @@ public class InventoryWindow implements Common, Serializable {
      * number of focuses, it returns back to the beginning to recycle.
      */
     public void nextFocus() {
-        if (currentFocus <= 1) {
+        if (currentFocus < 1) {
             currentFocus++;
         } else {
             currentFocus = 0;
@@ -390,7 +401,6 @@ public class InventoryWindow implements Common, Serializable {
      */
     public void setMoving(boolean isMoving) {
         this.isMoving = isMoving;
-        moveLength = 0;
     }
 
     /**

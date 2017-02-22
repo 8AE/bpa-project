@@ -121,7 +121,7 @@ public class Character implements Common, Serializable {
 
         // load the sprite map
         if (colorImage == null || greyscaleImage == null) {
-            loadImage("image/characters_1-4.png");
+            loadImage("image/characters.png");
         }
 
         // making a greyscale copy of the sprites for the game over animation

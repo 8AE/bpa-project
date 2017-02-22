@@ -18,11 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import java.util.Random;
 import javax.swing.Timer;
 import java.util.Vector;
@@ -94,7 +90,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     // The window for the pause menu
     private PauseWindow pauseWindow;
     private static Rectangle PAUSE_RECT = new Rectangle(290, 200, 110, 155);
-    
+
     //Draws the popup
     private NotificationPopup popup;
     private static Rectangle POP_RECT = new Rectangle(300, 96, 250, 45);
@@ -109,7 +105,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     // BGM
     // from TAM Music Factory http://www.tam-music.com/
-    private static final String[] bgmNames = {"castle", "field"};
+    private static final String[] bgmNames = {"main"};
     // Sound Clip
     private static final String[] soundNames = {"treasure", "door", "step", "beep", "boop"};
 
@@ -154,12 +150,9 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         // Create maps.
         maps = new Map[6];
-        maps[0] = new Map("map/castle.map", "event/castle.evt", "theme", this);
-        maps[1] = new Map("map/field.map", "event/field.evt", "field", this);
-        maps[2] = new Map("map/map.map", "event/map.evt", "field", this);
-        maps[3] = new Map("map/level2.map", "event/level2.evt", "field", this);
-        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "field", this);
-        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "field", this);
+        maps[3] = new Map("map/level2.map", "event/level2.evt", "main", this);
+        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
+        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
         mapNo = 4;  // initial map
 
         // Create the main character, our hero.
@@ -172,22 +165,22 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
         // Create Shop Window
         shopWindow = new ShopWindow(MENU_RECT);
-        
+
         // Create message window.
         messageWindow = new MessageWindow(WND_RECT);
-        
+
         // Create inventory window.
-        inventoryWindow = new InventoryWindow(MENU_RECT);
-        
+        inventoryWindow = new InventoryWindow(MENU_RECT, this);
+
         // Create quest window.
         questWindow = new QuestWindow(MENU_RECT);
-        
+
         // Create Shop Window
         pauseWindow = new PauseWindow(PAUSE_RECT);
-        
+
         // Create HUD.
         hudWindow = new HudWindow();
-        
+
         // Create the popup window.
         popup = new NotificationPopup(POP_RECT);
 
@@ -196,7 +189,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         // The background music of the main menu plays.
         bgm.play("main");
         bgm.isLoop(true);
-
 
         // Start game loop.
         gameLoop = new Thread(this);
@@ -207,6 +199,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     @Override
     public void run() {
+        
         long beforeTime, timeDiff, sleepTime;
 
         beforeTime = System.currentTimeMillis();
@@ -309,7 +302,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         }
 
         if (isStart) {
-            
+
             try {
                 credits = ImageIO.read(getClass().getResource("image/credits.png"));
             } catch (IOException | IllegalArgumentException e) {
@@ -391,7 +384,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
             //Draws Shop Winodw
             shopWindow.draw(dbg);
-            
+
             // Draw popup message window.
             popup.draw(dbg);
 
@@ -403,7 +396,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
             // Draw pause Menu
             pauseWindow.draw(dbg);
-            
+
             if (isGameOver) {
                 try {
                     gameOver = ImageIO.read(getClass().getResource("image/gameover.png"));
@@ -441,7 +434,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             dbg.drawString("(" + hero.getPX() + "," + hero.getPY() + ")", 4, 48);
             dbg.drawString(maps[mapNo].getBgmName(), 4, 64);
         }
-        
+
         // Draw message window last so it always pop ups on top.
         messageWindow.draw(dbg);
     }
@@ -462,13 +455,13 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     private void mainMenuStartUp() {
         try {
             credits = ImageIO.read(getClass().getResource("image/credits.png"));
-            //mainMenuScreen = ImageIO.read(getClass().getResource("image/mainMenu.png"));
+            mainMenuScreen = ImageIO.read(getClass().getResource("image/mainMenu.png"));
         } catch (IOException | IllegalArgumentException e) {
-            //LOGGER.log(Level.SEVERE, e.toString(), e);
+            LOGGER.log(Level.SEVERE, e.toString(), e);
 
             try {
-                //CrashReport cr = new CrashReport(e);
-                //cr.show();
+                CrashReport cr = new CrashReport(e);
+                cr.show();
             } catch (Exception n) {
                 // do nothing
             }
@@ -502,8 +495,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                 isMainMenu = true;
                 isGameOver = false;
 
-                bgm.play("main");
-bgm.isLoop(true);
                 leftKey = new ActionKey();
                 rightKey = new ActionKey();
                 upKey = new ActionKey(ActionKey.SLOWER_INPUT);
@@ -512,16 +503,16 @@ bgm.isLoop(true);
                 try {
                     loadGame();
 
-                // The background music of the loaded map plays.
-                bgm.play(maps[mapNo].getBgmName());
-                bgm.isLoop(true);
+                    // The background music of the loaded map plays.
+                    // bgm.play(maps[mapNo].getBgmName());
+                    bgm.isLoop(true);
 
-                isGameOver = false;
+                    isGameOver = false;
 
-                leftKey = new ActionKey();
-                rightKey = new ActionKey();
-                upKey = new ActionKey();
-                downKey = new ActionKey();
+                    leftKey = new ActionKey();
+                    rightKey = new ActionKey();
+                    upKey = new ActionKey();
+                    downKey = new ActionKey();
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, e.toString(), e);
                     messageWindow.setMessage("THERE IS NO/LOAD DATA");
@@ -560,7 +551,7 @@ bgm.isLoop(true);
                 hero.setMoving(true);
             }
         }
-        
+
         //The pause menu opens
         if (escKey.isPressed()) {
             enterKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
@@ -568,30 +559,28 @@ bgm.isLoop(true);
             rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
             upKey = new ActionKey(ActionKey.SLOWER_INPUT);
             downKey = new ActionKey(ActionKey.SLOWER_INPUT);
-            
+
             pauseWindow.show();
-            
+
         }
-        
+
         // An action is performed if there are object events in front of or under the hero, depending on the case.
         if (enterKey.isPressed()) {
 
             ShopEvent shopEvent = hero.shopSearch();
             if (shopEvent != null) {
-                // waveEngine.play("treasure");
                 System.out.print("Hello");
                 leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
                 rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
                 upKey = new ActionKey(ActionKey.SLOWER_INPUT);
                 downKey = new ActionKey(ActionKey.SLOWER_INPUT);
                 shopWindow.show();
-                
+
                 return;
             }
 
             QuestEvent questEvent = hero.questSearch();
             if (questEvent != null) {
-                // waveEngine.play("treasure");
                 messageWindow.setMessage("HERO FOUND/" + questEvent.getQuestName());
                 messageWindow.show();
 
@@ -625,10 +614,10 @@ bgm.isLoop(true);
                         inventoryWindow.add(treasure.toWeapon()); // Item is added based on positioning on item chip image.
                     } else {
                         inventoryWindow.add(treasure.toItem()); // Item is added based on positioning on item chip image.
-                        
+
                     }
                     messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName());
-                    
+
                 } else { // When the inventory of the hero is full, the user must choose where to make room.
                     messageWindow.setMessage("HERO DISCOVERED/" + treasure.getItemName() + "|YOUR INVENTORY IS/FULL! YOU NEED TO/MAKE SPACE!");
                     // Action key movement types are changed to work with the inventory.
@@ -636,7 +625,7 @@ bgm.isLoop(true);
                     rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     upKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     downKey = new ActionKey(ActionKey.SLOWER_INPUT);
-                    
+
                     // Inventory window is opened with the "TRASH_ITEM" mode enabled to make space for new item.
                     inventoryWindow.show(InventoryWindow.TRASH_ITEM, treasure.toItem());
                 }
@@ -708,6 +697,12 @@ bgm.isLoop(true);
             }
         } catch (Exception e) {
             LOGGER.log(Level.FINER, e.toString(), e);
+            try {
+                LogReport lr = new LogReport("Attack disappeared while checking:\n\t" + e);
+                lr.saveLog();
+            } catch (IOException ex) {
+                // do nothing
+            }
         }
     }
 
@@ -764,10 +759,10 @@ bgm.isLoop(true);
                 hudWindow.selectItem(inventoryWindow.getItem());
                 return;
             }
-            
+
             if (inventoryWindow.getItem() instanceof Weapon) {
                 hudWindow.selectItem(inventoryWindow.getItem());
-                hero.setWeapon((Weapon)hudWindow.getSelectedItem());
+                hero.setWeapon((Weapon) hudWindow.getSelectedItem());
             } else {
                 messageWindow.setMessage("YOU CANT EQUIPT THAT");
                 messageWindow.show();
@@ -798,7 +793,7 @@ bgm.isLoop(true);
             inventoryWindow.show();
         }
     }
-    
+
     private void shopWindowCheckInput() {
         // When the escape key is pressed again, the shop window is closed.
         if (escKey.isPressed()) {
@@ -808,7 +803,7 @@ bgm.isLoop(true);
             upKey = new ActionKey();
             downKey = new ActionKey();
             shopWindow.hide();
-            
+
         }
         // The cursor moves left and right to see the items
         if (leftKey.isPressed()) {
@@ -817,9 +812,9 @@ bgm.isLoop(true);
         if (rightKey.isPressed()) {
             shopWindow.setDirection(RIGHT);
         }
-        
+
     }
-    
+
     private void pauseWindowCheckInput() {
         // When the escape key is pressed again, the shop window is closed.
         if (escKey.isPressed()) {
@@ -829,9 +824,9 @@ bgm.isLoop(true);
             rightKey = new ActionKey();
             upKey = new ActionKey();
             downKey = new ActionKey();
-            
+
             pauseWindow.hide();
-            
+
         }
         // The cursor moves left and right to see the items
         if (upKey.isPressed()) {
@@ -848,7 +843,7 @@ bgm.isLoop(true);
                     rightKey = new ActionKey();
                     upKey = new ActionKey();
                     downKey = new ActionKey();
-                    
+
                     pauseWindow.hide();
                     break;
                 case 1:
@@ -858,16 +853,19 @@ bgm.isLoop(true);
                     rightKey = new ActionKey();
                     upKey = new ActionKey();
                     downKey = new ActionKey();
-                    
+
                     pauseWindow.hide();
                     break;
                 case 2:
-                    
-                    System.exit(0);
+                    leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    upKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    downKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    isMainMenu = true;
                     break;
             }
         }
-        
+
     }
 
     private void mainMenuCheckInput() {
@@ -896,8 +894,8 @@ bgm.isLoop(true);
                 newGame();
 
                 // The background music of the initial map plays.
-                bgm.play(maps[mapNo].getBgmName());
-bgm.isLoop(true);
+                // bgm.play(maps[mapNo].getBgmName());
+                bgm.isLoop(true);
                 leftKey = new ActionKey();
                 rightKey = new ActionKey();
                 upKey = new ActionKey();
@@ -909,9 +907,9 @@ bgm.isLoop(true);
                     loadGame();
 
                     // The background music of the loaded map plays.
-                    bgm.play(maps[mapNo].getBgmName());
-bgm.isLoop(true);
-                    
+                    // bgm.play(maps[mapNo].getBgmName());
+                    bgm.isLoop(true);
+
                     isMainMenu = false;
                     leftKey = new ActionKey();
                     rightKey = new ActionKey();
@@ -942,7 +940,7 @@ bgm.isLoop(true);
                     hero = new Character(m.destX, m.destY, 0, DOWN, 0, 1, 0, maps[mapNo]);
                     hero.setIsHero(true);
                     maps[mapNo].addCharacter(hero);
-                    bgm.play(maps[mapNo].getBgmName());
+                    // bgm.play(maps[mapNo].getBgmName());
                     bgm.isLoop(true);
                     maps[mapNo].runThread();
                 }
@@ -980,10 +978,10 @@ bgm.isLoop(true);
                         // do nothing
                     }
                 }
-
+                
                 leftKey = new ActionKey(ActionKey.SLOWER_INPUT);
                 rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
-
+                
                 isGameOver = true;
                 gameoverTimer.start();
             }
@@ -1006,19 +1004,19 @@ bgm.isLoop(true);
             }
         }
     }
-    
-    public void CheckifQuestCharacter(Character c) {
+
+    public void checkifQuestCharacter(Character c) {
         try {
             for (int i = 0; i < questWindow.getQuests().size(); i++) {
                 if (c.getId() == questWindow.getQuests().get(i).getTarget()) {
                     popup.setMessage("QUEST COMPLETE");
                     popup.show();
                     questWindow.getQuests().get(i).setQuestFinished(true);
-                    
+
                 }
             }
         } catch (Exception e) {
-            
+
         }
     }
 
@@ -1119,20 +1117,16 @@ bgm.isLoop(true);
         attackKey = new ActionKey(ActionKey.SLOWER_INPUT);
 
         // Create maps.
-         maps = new Map[6];
-        maps[0] = new Map("map/castle.map", "event/castle.evt", "theme", this);
-        maps[1] = new Map("map/field.map", "event/field.evt", "field", this);
-        maps[2] = new Map("map/map.map", "event/map.evt", "field", this);
-        maps[3] = new Map("map/level2.map", "event/level2.evt", "field", this);
-        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "field", this);
-        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "field", this);
+        maps = new Map[6];
+        maps[3] = new Map("map/level2.map", "event/level2.evt", "main", this);
+        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
+        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
         mapNo = 4;  // initial map
 
         // Create the main character, our hero.
         // This is also the start point of the game.
         hero = new Character(15, 21, 0, DOWN, 0, 1, 0, maps[mapNo]);
         hero.setIsHero(true);
-
 
         // Add characters to the map.
         maps[mapNo].addCharacter(hero);
@@ -1141,7 +1135,7 @@ bgm.isLoop(true);
         messageWindow = new MessageWindow(WND_RECT);
 
         // Create inventory window.
-        inventoryWindow = new InventoryWindow(MENU_RECT);
+        inventoryWindow = new InventoryWindow(MENU_RECT, this);
 
         // Create quest window.
         questWindow = new QuestWindow(MENU_RECT);
@@ -1163,16 +1157,16 @@ bgm.isLoop(true);
             int keyCode = e.getKeyCode(); // The key on the keyboard pressed is obtained.
 
             // If the key equals this value, it indicates that the action below should occur (press left key in this case).
-            if (keyCode == KeyEvent.VK_A) {
+            if (keyCode == KeyEvent.VK_LEFT) {
                 leftKey.press();
             }
-            if (keyCode == KeyEvent.VK_D) {
+            if (keyCode == KeyEvent.VK_RIGHT) {
                 rightKey.press();
             }
-            if (keyCode == KeyEvent.VK_W) {
+            if (keyCode == KeyEvent.VK_UP) {
                 upKey.press();
             }
-            if (keyCode == KeyEvent.VK_S) {
+            if (keyCode == KeyEvent.VK_DOWN) {
                 downKey.press();
             }
             if (keyCode == KeyEvent.VK_ENTER) {
@@ -1187,7 +1181,7 @@ bgm.isLoop(true);
             if (keyCode == KeyEvent.VK_SPACE) {
                 attackKey.press();
             }
-            if (keyCode == KeyEvent.VK_P) {
+            if (keyCode == KeyEvent.VK_SHIFT) {
                 tabKey.press();
             }
             if (keyCode == KeyEvent.VK_ESCAPE) {
@@ -1202,16 +1196,16 @@ bgm.isLoop(true);
         int keyCode = e.getKeyCode(); // The key on the keyboard released is obtained.
 
         // If the key equals this value, it indicates that the action below should occur (release left key in this case).
-        if (keyCode == KeyEvent.VK_A) {
+        if (keyCode == KeyEvent.VK_LEFT) {
             leftKey.release();
         }
-        if (keyCode == KeyEvent.VK_D) {
+        if (keyCode == KeyEvent.VK_RIGHT) {
             rightKey.release();
         }
-        if (keyCode == KeyEvent.VK_W) {
+        if (keyCode == KeyEvent.VK_UP) {
             upKey.release();
         }
-        if (keyCode == KeyEvent.VK_S) {
+        if (keyCode == KeyEvent.VK_DOWN) {
             downKey.release();
         }
         if (keyCode == KeyEvent.VK_ENTER) {
@@ -1226,7 +1220,7 @@ bgm.isLoop(true);
         if (keyCode == KeyEvent.VK_SPACE) {
             attackKey.release();
         }
-        if (keyCode == KeyEvent.VK_P) {
+        if (keyCode == KeyEvent.VK_SHIFT) {
             tabKey.release();
         }
         if (keyCode == KeyEvent.VK_ESCAPE) {
@@ -1239,8 +1233,8 @@ bgm.isLoop(true);
     }
 
     private void loadSound() {
-      
- // load bgm files
+
+        // load bgm files
         for (String bgmName : bgmNames) {
             bgm.load(bgmName, "bgm/" + bgmName + ".wav");
         }
