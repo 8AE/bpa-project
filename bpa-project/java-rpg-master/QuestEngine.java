@@ -2,6 +2,7 @@
 import java.awt.Point;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -17,7 +18,7 @@ import javax.swing.JOptionPane;
  *
  * @author Ahmad El-baba 2/7/2017
  */
-public class QuestEngine {
+public class QuestEngine implements Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 

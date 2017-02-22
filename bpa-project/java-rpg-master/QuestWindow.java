@@ -2,28 +2,22 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import javax.swing.ImageIcon;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 /**
  * Created by Ahmad El-baba on 1/3/2017.
  */
-public class QuestWindow implements Common,Serializable {
+public class QuestWindow implements Common, Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 
-    MessageEngine messageEngine;
-    QuestEngine questEngine;
+    private static MessageEngine messageEngine;
+    private static QuestEngine questEngine;
 
-    List<Quest> questList = new ArrayList();
+    private static List<Quest> questList = new ArrayList();
 
     // width of white border
     private static final int EDGE_WIDTH = 2;
@@ -32,21 +26,21 @@ public class QuestWindow implements Common,Serializable {
     private int questBoardSpot = 0;
     private boolean isMoving;
 
-    private final int QUEST_SLOT_SPACING = 40;
+    private static final int QUEST_SLOT_SPACING = 40;
 
     private static Thread threadAnimation;
 
     
     
     // outer frame
-    private Rectangle boarder;
+    private static Rectangle boarder;
     // inner frame
-    private Rectangle innerRect;
+    private static Rectangle innerRect;
 
-    //CCurson
-    private Rectangle cursor;
+    //Cursor
+    private static Rectangle cursor;
     
-    private WaveEngine waveEngine;
+    private static WaveEngine waveEngine;
     private static final String[] soundNames = {"beep", "boop"};
 
     public QuestWindow(Rectangle rect) {
@@ -221,7 +215,7 @@ public class QuestWindow implements Common,Serializable {
         }
     }
     
-    private class AnimationThread extends Thread {
+    private class AnimationThread extends Thread implements Serializable{
 
         public void run() {
             while (true) {

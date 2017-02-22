@@ -2,6 +2,7 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -15,7 +16,7 @@ import java.util.Date;
  *
  * @author Noah
  */
-public class LogReport {
+public class LogReport implements Serializable {
     
     FileWriter fw;
     PrintWriter pw;

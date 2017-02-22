@@ -149,11 +149,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         escKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
 
         // Create maps.
-        maps = new Map[6];
-        maps[3] = new Map("map/level2.map", "event/level2.evt", "main", this);
-        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
-        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
-        mapNo = 4;  // initial map
+        maps = new Map[3];
+        maps[0] = new Map("map/level2.map", "event/level2.evt", "main", this);
+        maps[1] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
+        maps[2] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
+        mapNo = 1;  // initial map
 
         // Create the main character, our hero.
         // This is also the start point of the game.
@@ -911,6 +911,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     bgm.isLoop(true);
 
                     isMainMenu = false;
+                    pauseWindow.hide();
                     leftKey = new ActionKey();
                     rightKey = new ActionKey();
                     upKey = new ActionKey();
@@ -1117,11 +1118,11 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         attackKey = new ActionKey(ActionKey.SLOWER_INPUT);
 
         // Create maps.
-        maps = new Map[6];
-        maps[3] = new Map("map/level2.map", "event/level2.evt", "main", this);
-        maps[4] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
-        maps[5] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
-        mapNo = 4;  // initial map
+        maps = new Map[3];
+        maps[0] = new Map("map/level2.map", "event/level2.evt", "main", this);
+        maps[1] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
+        maps[2] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
+        mapNo = 1;  // initial map
 
         // Create the main character, our hero.
         // This is also the start point of the game.

@@ -4,6 +4,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Logger;
@@ -18,7 +19,7 @@ import javax.swing.JOptionPane;
  *
  * @author Ahmad 2/9/2017
  */
-public class NotificationPopup implements Common {
+public class NotificationPopup implements Common, Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 

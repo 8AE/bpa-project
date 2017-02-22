@@ -20,28 +20,28 @@ public class HudWindow implements Common, Serializable {
     private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 
     //healthBar
-    private Rectangle healthBarBackround;
-    private Rectangle healthBar;
+    private static Rectangle healthBarBackround;
+    private static Rectangle healthBar;
     //healthBar outline
-    private Rectangle outerHealthBar;
+    private static Rectangle outerHealthBar;
     
     
     
     //Item Box
-    private Rectangle itemBox;
+    private static Rectangle itemBox;
     //Item Box outline
-    private Rectangle outerItemBox;
+    private static Rectangle outerItemBox;
     
-    private Rectangle backround;
+    private static Rectangle backround;
     
     //Message Engine
-    private MessageEngine messageEngine;
-    private Item selectedItem;
-    private InventoryEngine inventory;
+    private static MessageEngine messageEngine;
+    private static Item selectedItem;
+    private static InventoryEngine inventory;
     
     private double health;
     
-    private Image itemsImage;
+    private static Image itemsImage;
     
     
     public HudWindow() {

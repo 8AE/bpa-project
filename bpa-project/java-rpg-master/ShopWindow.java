@@ -1,13 +1,14 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.io.Serializable;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import java.util.List;
 /**
  * Created by Ahmad El-baba on 2/15/2017.
  */
-public class ShopWindow implements Common {
+public class ShopWindow implements Common, Serializable {
 
     MessageEngine messageEngine;
 

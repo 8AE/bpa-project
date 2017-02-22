@@ -38,20 +38,20 @@ public class InventoryWindow implements Common, Serializable {
     private final int MAIN_FOCUS = 0;
     private final int TRASH_FOCUS = 1;
 
-    private BufferedImage trashIcon;
+    private static BufferedImage trashIcon;
     
     // outer frame
-    private Rectangle rect;
+    private static Rectangle rect;
     // inner frame
-    private Rectangle invInnerRect;
+    private static Rectangle invInnerRect;
     // outer item frame
-    private Rectangle invSquare;
+    private static Rectangle invSquare;
     // inner item frame
-    private Rectangle invInnerSquare;
+    private static Rectangle invInnerSquare;
     // cursor
-    private Rectangle cursorRect;
+    private static Rectangle cursorRect;
     // trash
-    private Rectangle trashRect;
+    private static Rectangle trashRect;
 
     // is message window visible ?
     private boolean isVisible = false;
@@ -62,16 +62,16 @@ public class InventoryWindow implements Common, Serializable {
     private int invBoardY = 0;
     private int currentFocus = 0;
     private boolean isMoving;
-    private Color cursorColor;
+    private static Color cursorColor;
 
     // trashing an item
     private boolean isTrashing = false;
-    private Item itemOnStandBy = null;
+    private static Item itemOnStandBy = null;
 
     // the engines needed in this class are declared
-    private InventoryEngine inventoryEngine;
-    private MessageEngine messageEngine;
-    private WaveEngine waveEngine;
+    private static InventoryEngine inventoryEngine;
+    private static MessageEngine messageEngine;
+    private static WaveEngine waveEngine;
 
     // Sound Clips needed in the inventory window
     private static final String[] soundNames = {"beep", "boop"};
@@ -526,7 +526,7 @@ public class InventoryWindow implements Common, Serializable {
      * This thread manages the animation of the cursor so that it moves a normal
      * speed.
      */
-    private class AnimationThread extends Thread {
+    private class AnimationThread extends Thread implements Serializable {
 
         public void run() {
             while (true) {
