@@ -3,11 +3,9 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 import java.awt.image.*;
-import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.*;
-import javax.swing.JOptionPane;
 
 public class Map implements Common, Serializable {
 
@@ -32,11 +30,11 @@ public class Map implements Common, Serializable {
     private static BufferedImage currentChipSet;
 
     // characters in this map
-    private Vector<Character> characters = new Vector<Character>();
+    private ArrayList<Character> characters = new ArrayList<Character>();
     // events in this map
-    private Vector<Event> events = new Vector<Event>();
+    private ArrayList<Event> events = new ArrayList<Event>();
     // attacks in this map
-    private Vector<Attack> attacks = new Vector<Attack>();
+    private ArrayList<Attack> attacks = new ArrayList<Attack>();
 
     // reference to MainPanel
     private transient MainPanel panel;
@@ -454,18 +452,18 @@ public class Map implements Common, Serializable {
     /**
      * The Characters on this map.
      *
-     * @return the Vector of Characters.
+     * @return the ArrayList of Characters.
      */
-    public Vector<Character> getCharacters() {
+    public ArrayList<Character> getCharacters() {
         return characters;
     }
 
     /**
      * The Attacks on this map.
      *
-     * @return the Vector of Attacks.
+     * @return the ArrayList of Attacks.
      */
-    public Vector<Attack> getAttacks() {
+    public ArrayList<Attack> getAttacks() {
         return attacks;
     }
 
@@ -488,7 +486,7 @@ public class Map implements Common, Serializable {
     }
 
     /**
-     * Check the Vector of characters to find the one that is the hero.
+     * Check the ArrayList of characters to find the one that is the hero.
      *
      * @return the hero when it is found.
      */
@@ -636,10 +634,10 @@ public class Map implements Common, Serializable {
         int y = Integer.parseInt(st.nextToken());
         String itemName = st.nextToken();
         String itemType = st.nextToken();
-        TreasureEvent t = new TreasureEvent(x, y, itemName,itemType);
+        TreasureEvent t = new TreasureEvent(x, y, itemName, itemType);
         events.add(t);
     }
-    
+
     private void makeShopEvent(StringTokenizer st) {
         int x = Integer.parseInt(st.nextToken());
         int y = Integer.parseInt(st.nextToken());
@@ -657,7 +655,7 @@ public class Map implements Common, Serializable {
         String reward = st.nextToken();
         int DX = Integer.parseInt(st.nextToken());
         int DY = Integer.parseInt(st.nextToken());
-         int target = Integer.parseInt(st.nextToken());
+        int target = Integer.parseInt(st.nextToken());
         QuestEvent s = new QuestEvent(x, y, questType, questName, questDisctription, expGained, reward, DX, DY, target);
         events.add(s);
     }
@@ -702,7 +700,7 @@ public class Map implements Common, Serializable {
             System.out.println();
         }
     }
-    
+
     public void setPanel(MainPanel panel) {
         this.panel = panel;
     }
@@ -739,12 +737,12 @@ public class Map implements Common, Serializable {
                                     break attack;
                                 }
                             } else // When the character is the hero, they can attack all attackable characters.
-                            if (c.getHitbox().contains(new Point(a.getPX(), a.getPY())) && c.isDamageable() && a.getCharacter() != c) {
-                                c.damage(a.getWeapon().getDamage());
-                                c.setAttacked(true);
-                                a.removeAttack();
-                                break attack;
-                            }
+                             if (c.getHitbox().contains(new Point(a.getPX(), a.getPY())) && c.isDamageable() && a.getCharacter() != c) {
+                                    c.damage(a.getWeapon().getDamage());
+                                    c.setAttacked(true);
+                                    a.removeAttack();
+                                    break attack;
+                                }
                         } catch (Exception e) {
                             LOGGER.log(Level.INFO, e.toString(), e);
                             try {

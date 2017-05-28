@@ -1,12 +1,7 @@
 
 import java.awt.Point;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 public class QuestEvent extends Event implements Serializable {
 
@@ -22,7 +17,7 @@ public class QuestEvent extends Event implements Serializable {
 
     public QuestEvent(int x, int y, String questType, String questName, String questDisctription,
             int expGained, String reward, int DX, int DY, int target) {
-        super(x, y, 24, false);
+        super(x, y, 50, false);
         this.questType = questType;
         this.questName = questName;
         this.questDisctription = questDisctription;
@@ -56,7 +51,7 @@ public class QuestEvent extends Event implements Serializable {
     public String getReward() {
         return reward;
     }
-    
+
     public int getTarget() {
         return target;
     }

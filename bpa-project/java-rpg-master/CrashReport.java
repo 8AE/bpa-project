@@ -31,6 +31,8 @@ public class CrashReport implements Serializable {
     PrintWriter pw;
     Exception error;
 
+    // A popup appears on the screen saying that the program has crashed and asks
+    // if the user wishes to send a crash report.
     public CrashReport(Exception error) throws IOException {
 
         this.error = error;
@@ -42,11 +44,13 @@ public class CrashReport implements Serializable {
 
     public void show() throws IOException {
 
+        // Error saved to a text file.
         pw.print(new SimpleDateFormat("[yyyy.MM.dd.HH:mm:ss] ").format(new Date()));
         error.printStackTrace(pw);
         pw.close();
         fw.close();
 
+        // Dialog box created.
         int selection = JOptionPane.showConfirmDialog(
                 null,
                 error + " Please restart game."
@@ -64,7 +68,10 @@ public class CrashReport implements Serializable {
         }
     }
 
+    // An email is sent to our presupplied email. It helps us to see where the crashes occur and which version of
+    // the game is being used.
     private void sendMail(Exception report) {
+        // NOT SECURE!
         final String username = "bpajavagame@gmail.com";
         final String password = "BPAruleZ";
 
@@ -73,6 +80,8 @@ public class CrashReport implements Serializable {
         report.printStackTrace(pw);
         String reportString = sw.toString();
 
+        // Following code obtained mostly from https://www.tutorialspoint.com/javamail_api/javamail_api_gmail_smtp_server.htm
+        // Has been motified to work with our case.
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");

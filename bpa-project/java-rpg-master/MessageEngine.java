@@ -2,17 +2,11 @@
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
 import java.lang.Character;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
-
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 
 // in this class, Character does not mean Player!
 public class MessageEngine implements Serializable {
@@ -81,6 +75,7 @@ public class MessageEngine implements Serializable {
                 pos.y + FONT_HEIGHT, null);
     }
 
+    // Create a map of all of the characters and their locations.
     private void createHash() {
 
         // Numbers

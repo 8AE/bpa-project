@@ -30,8 +30,6 @@ public class QuestWindow implements Common, Serializable {
 
     private static Thread threadAnimation;
 
-    
-    
     // outer frame
     private static Rectangle boarder;
     // inner frame
@@ -39,7 +37,7 @@ public class QuestWindow implements Common, Serializable {
 
     //Cursor
     private static Rectangle cursor;
-    
+
     private static WaveEngine waveEngine;
     private static final String[] soundNames = {"beep", "boop"};
 
@@ -47,7 +45,7 @@ public class QuestWindow implements Common, Serializable {
         messageEngine = new MessageEngine();
         questEngine = new QuestEngine();
         waveEngine = new WaveEngine();
-        
+
         cursor = new Rectangle(70, 138, 214, 28);
         this.boarder = rect;
         innerRect = new Rectangle(
@@ -57,7 +55,7 @@ public class QuestWindow implements Common, Serializable {
                 rect.height - EDGE_WIDTH * 2);
 
         loadSound();
-        
+
         // run thread
         threadAnimation = new Thread(new QuestWindow.AnimationThread());
         threadAnimation.start();
@@ -160,7 +158,8 @@ public class QuestWindow implements Common, Serializable {
                         questBoardSpot = questList.size();
                     } else {
                         questBoardSpot = questList.size() - 1;
-                    }   waveEngine.play("boop");
+                    }
+                    waveEngine.play("boop");
                 }
                 isMoving = false;
                 break;
@@ -208,14 +207,14 @@ public class QuestWindow implements Common, Serializable {
     }
 
     private void loadSound() {
-        
+
         // load sound clip files
         for (String soundName : soundNames) {
             waveEngine.load(soundName, "sound/" + soundName + ".wav");
         }
     }
-    
-    private class AnimationThread extends Thread implements Serializable{
+
+    private class AnimationThread extends Thread implements Serializable {
 
         public void run() {
             while (true) {

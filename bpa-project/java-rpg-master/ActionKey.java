@@ -1,12 +1,7 @@
 
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 public class ActionKey implements Serializable {
 
@@ -61,6 +56,7 @@ public class ActionKey implements Serializable {
 
     }
 
+    // The button has been pressed
     public void press() {
         if (mode == DEAD_INPUT) {
             return;
@@ -82,6 +78,7 @@ public class ActionKey implements Serializable {
         isFirst = false;
     }
 
+    // The button has been released
     public void release() {
         if (mode == DEAD_INPUT) {
             return;
@@ -101,6 +98,7 @@ public class ActionKey implements Serializable {
         isFirst = true;
     }
 
+    // Check if the button is currently pressed
     public boolean isPressed() {
 
         if (amount != 0) {
@@ -119,30 +117,6 @@ public class ActionKey implements Serializable {
         return false;
     }
 
-    public void fatalErrorMessage(Exception e) {
-
-        try {
-            FileWriter fw = new FileWriter("errors.txt", true);
-            PrintWriter pw = new PrintWriter(fw);
-            pw.print(new SimpleDateFormat("[yyyy.MM.dd.HH:mm:ss] ").format(new Date()));
-            e.printStackTrace(pw);
-            pw.close();
-            fw.close();
-        } catch (Exception n) {
-            // nothing happens
-        }
-        int selection = JOptionPane.showConfirmDialog(
-                null,
-                e + " Please restart game.",
-                "ERROR",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.ERROR_MESSAGE);
-
-        if (selection == 0) {
-            System.exit(0);
-        }
-    }
-
     private class SlowerInputThread extends Thread {
 
         public void run() {
@@ -152,7 +126,13 @@ public class ActionKey implements Serializable {
                     SlowerInputThread.sleep(400);
                 } catch (InterruptedException e) {
                     LOGGER.log(Level.SEVERE, e.toString(), e);
-                    fatalErrorMessage(e);
+
+                    try {
+                        CrashReport cr = new CrashReport(e);
+                        cr.show();
+                    } catch (Exception n) {
+                        // do nothing
+                    }
                 }
 
                 isReady = true;

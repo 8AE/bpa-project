@@ -2,7 +2,7 @@
 import java.awt.*;
 import java.io.*;
 import java.awt.image.*;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.*;
@@ -65,7 +65,7 @@ public class Character implements Common, Serializable {
     private boolean isHero;
 
     // the hero's quest list
-    private Vector<Quest> questList = new Vector();
+    private ArrayList<Quest> questList = new ArrayList();
 
     // what is this character's weapon
     private Weapon weapon = new Weapon("Long Sword", "This is a sword", 20, 4, 1);
@@ -615,7 +615,7 @@ public class Character implements Common, Serializable {
         }
         return null;
     }
-    
+
     /**
      * Check if there is a door in front of the hero.
      *

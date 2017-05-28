@@ -2,13 +2,8 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -33,6 +28,8 @@ public class NotificationPopup implements Common, Serializable {
     // inner frame
     private Rectangle innerRect;
 
+    private static Thread threadAnimation;
+
     public NotificationPopup(Rectangle rect) {
         messageEngine = new MessageEngine();
         this.boarder = rect;
@@ -41,6 +38,9 @@ public class NotificationPopup implements Common, Serializable {
                 rect.y + EDGE_WIDTH,
                 rect.width - EDGE_WIDTH * 2,
                 rect.height - EDGE_WIDTH * 2);
+
+        threadAnimation = new Thread(new NotificationPopup.AnimationThread());
+        threadAnimation.start();
 
     }
 
@@ -68,6 +68,20 @@ public class NotificationPopup implements Common, Serializable {
 
     public void hide() {
         isVisible = false;
+    }
+
+    private class AnimationThread extends Thread implements Serializable {
+
+        public void run() {
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            hide();
+        }
     }
 
 }

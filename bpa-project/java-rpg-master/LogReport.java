@@ -22,6 +22,7 @@ public class LogReport implements Serializable {
     PrintWriter pw;
     String log;
     
+    // Log information needed from the code to a save file.
     public LogReport(String log) throws IOException {
         this.log = log;
         

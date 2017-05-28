@@ -21,7 +21,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Random;
 import javax.swing.Timer;
-import java.util.Vector;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -39,7 +39,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     private static final int PERIOD = 20;
 
     // debug mode
-    private static final boolean DEBUG_MODE = true;
+    private static final boolean DEBUG_MODE = false;
 
     // map list
     private Map[] maps;
@@ -105,7 +105,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     // BGM
     // from TAM Music Factory http://www.tam-music.com/
-    private static final String[] bgmNames = {"main"};
+    private static final String[] bgmNames = {"alert"};
     // Sound Clip
     private static final String[] soundNames = {"treasure", "door", "step", "beep", "boop"};
 
@@ -148,12 +148,12 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         attackKey = new ActionKey(ActionKey.SLOWER_INPUT);
         escKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
 
-        // Create maps.
-        maps = new Map[3];
-        maps[0] = new Map("map/level2.map", "event/level2.evt", "main", this);
-        maps[1] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
-        maps[2] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
-        mapNo = 1;  // initial map
+        maps = new Map[4];
+        maps[2] = new Map("map/level2.map", "event/level2.evt", "alert", this);
+        maps[0] = new Map("map/level1_1.map", "event/level1_1.evt", "alert", this);
+        maps[1] = new Map("map/level1_2.map", "event/level1_2.evt", "alert", this);
+        maps[3] = new Map("map/level3.map", "event/level3.evt", "alert", this);
+        mapNo = 0;  // initial map
 
         // Create the main character, our hero.
         // This is also the start point of the game.
@@ -187,7 +187,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         // Load Backgound Music (BGM) and sound clips.
         loadSound();
         // The background music of the main menu plays.
-        bgm.play("main");
+        bgm.play("alert");
         bgm.isLoop(true);
 
         // Start game loop.
@@ -460,8 +460,8 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             LOGGER.log(Level.SEVERE, e.toString(), e);
 
             try {
-                CrashReport cr = new CrashReport(e);
-                cr.show();
+                //CrashReport cr = new CrashReport(e);
+                //cr.show();
             } catch (Exception n) {
                 // do nothing
             }
@@ -502,10 +502,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
             } else if (gameOverSelection == 1) {
                 try {
                     loadGame();
-
-                    // The background music of the loaded map plays.
-                    // bgm.play(maps[mapNo].getBgmName());
-                    bgm.isLoop(true);
 
                     isGameOver = false;
 
@@ -687,6 +683,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
                 for (int i = 0; i <= questWindow.getQuests().size(); i++) {
                     if (trigger.getPoint(t).equals(questWindow.getQuests().get(i).getDXY())) {
+                        popup = new NotificationPopup(POP_RECT);
                         popup.setMessage("QUEST COMPLETE");
                         popup.show();
                         questWindow.getQuests().get(i).setQuestFinished(true);
@@ -861,6 +858,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     rightKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     upKey = new ActionKey(ActionKey.SLOWER_INPUT);
                     downKey = new ActionKey(ActionKey.SLOWER_INPUT);
+                    pauseWindow.hide();
                     isMainMenu = true;
                     break;
             }
@@ -893,9 +891,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
                 newGame();
 
-                // The background music of the initial map plays.
-                // bgm.play(maps[mapNo].getBgmName());
-                bgm.isLoop(true);
                 leftKey = new ActionKey();
                 rightKey = new ActionKey();
                 upKey = new ActionKey();
@@ -905,10 +900,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
                 try {
                     loadGame();
-
-                    // The background music of the loaded map plays.
-                    // bgm.play(maps[mapNo].getBgmName());
-                    bgm.isLoop(true);
 
                     isMainMenu = false;
                     pauseWindow.hide();
@@ -941,7 +932,6 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
                     hero = new Character(m.destX, m.destY, 0, DOWN, 0, 1, 0, maps[mapNo]);
                     hero.setIsHero(true);
                     maps[mapNo].addCharacter(hero);
-                    // bgm.play(maps[mapNo].getBgmName());
                     bgm.isLoop(true);
                     maps[mapNo].runThread();
                 }
@@ -958,7 +948,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
     }
 
     private void heroAlive() {
-        Vector<Character> characters = maps[mapNo].getCharacters();
+        ArrayList<Character> characters = maps[mapNo].getCharacters();
         for (int i = 0; i < maps[mapNo].getCharacters().size(); i++) {
             if (characters.get(i).getIsHero()) {
                 return;
@@ -991,7 +981,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     private void characterMove() {
         // get characters in the current map
-        Vector<Character> characters = maps[mapNo].getCharacters();
+        ArrayList<Character> characters = maps[mapNo].getCharacters();
         // move each character
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
@@ -1010,6 +1000,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         try {
             for (int i = 0; i < questWindow.getQuests().size(); i++) {
                 if (c.getId() == questWindow.getQuests().get(i).getTarget()) {
+                    popup = new NotificationPopup(POP_RECT);
                     popup.setMessage("QUEST COMPLETE");
                     popup.show();
                     questWindow.getQuests().get(i).setQuestFinished(true);
@@ -1023,7 +1014,7 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
 
     private void characterAttack() {
         // get characters in the current map
-        Vector<Character> characters = maps[mapNo].getCharacters();
+        ArrayList<Character> characters = maps[mapNo].getCharacters();
         for (int i = 0; i < characters.size(); i++) {
             Character c = characters.get(i);
             if (c.getAttackType() == 1) {
@@ -1117,12 +1108,12 @@ class MainPanel extends JPanel implements KeyListener, Runnable, Common, ActionL
         questKey = new ActionKey(ActionKey.DETECT_INITIAL_PRESS_ONLY);
         attackKey = new ActionKey(ActionKey.SLOWER_INPUT);
 
-        // Create maps.
-        maps = new Map[3];
-        maps[0] = new Map("map/level2.map", "event/level2.evt", "main", this);
-        maps[1] = new Map("map/level1_1.map", "event/level1_1.evt", "main", this);
-        maps[2] = new Map("map/level1_2.map", "event/level1_2.evt", "main", this);
-        mapNo = 1;  // initial map
+        maps = new Map[4];
+        maps[2] = new Map("map/level2.map", "event/level2.evt", "alert", this);
+        maps[0] = new Map("map/level1_1.map", "event/level1_1.evt", "alert", this);
+        maps[1] = new Map("map/level1_2.map", "event/level1_2.evt", "alert", this);
+        maps[3] = new Map("map/level3.map", "event/level3.evt", "alert", this);
+        mapNo = 0;  // initial map
 
         // Create the main character, our hero.
         // This is also the start point of the game.

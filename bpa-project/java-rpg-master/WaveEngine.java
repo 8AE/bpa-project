@@ -1,13 +1,11 @@
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.*;
-import javax.swing.JOptionPane;
 
-public class WaveEngine implements LineListener,Serializable {
+public class WaveEngine implements LineListener, Serializable {
 
     private static final Logger LOGGER = Logger.getLogger(MainPanel.class.getName());
 
@@ -106,16 +104,16 @@ public class WaveEngine implements LineListener,Serializable {
             clip.setFramePosition(0);
         }
     }
+
     public void isLoop(boolean isLoop) {
         if (isLoop) {
             clip.loop(Clip.LOOP_CONTINUOUSLY);
         }
-        
+
     }
-    
+
     public void stop() {
         clip.stop();
     }
-     
 
 }

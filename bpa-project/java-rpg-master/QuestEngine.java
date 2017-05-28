@@ -1,13 +1,7 @@
 
 import java.awt.Point;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -35,7 +29,7 @@ public class QuestEngine implements Serializable {
                 break;
             case "ELIMINATION":
                 quest.setTarget(questEvent.getTarget());
-                quest.setDXY(new Point(0,0));
+                quest.setDXY(new Point(0, 0));
                 break;
             default:
                 break;

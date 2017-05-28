@@ -8,6 +8,7 @@ public abstract class Event implements Serializable {
     protected int id;
     protected boolean isHit;
 
+    // Basic bones of an event.
     public Event(int x, int y, int id, boolean isHit) {
         this.x = x;
         this.y = y;

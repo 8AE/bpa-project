@@ -2,16 +2,10 @@
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.logging.Logger;
-
 import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
 
 /**
  * Created by hpro1 on 11/29/16.
@@ -59,6 +53,7 @@ public class InventoryEngine implements Common, Serializable {
         }
     }
 
+    // The locations of item sprites
     private void createHash() {
         // item sprite positions
         itemPos.put(new Integer(0), new Point(0, 0)); //torch

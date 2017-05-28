@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -43,13 +44,14 @@ class Attack implements Common, Serializable {
     private static BufferedImage image;
 
     private WaveEngine waveEngine;
-    
+
     // Sound Clips needed in the attack
     private static final String[] soundNames = {"boop"};
-    
+
     // thread for attack animation
     private transient Thread threadAnimation;
 
+    // Creates an attack that will draw on screen. If it touches the hero or enemies, it will damage them.
     public Attack(int x, int y, int direction, Weapon weapon, Character character, Map map) {
 
         this.x = x;
@@ -69,7 +71,7 @@ class Attack implements Common, Serializable {
 
         waveEngine = new WaveEngine();
         loadSound();
-        
+
         // run thread
         threadAnimation = new Thread(new Attack.AttackAnimationThread());
         threadAnimation.start();
@@ -127,6 +129,7 @@ class Attack implements Common, Serializable {
         return weapon;
     }
 
+    // The area that the attack currently occupies.
     public Rectangle getAttackBox() {
         Rectangle attackBox = new Rectangle(px, py, CS, CS);
         return attackBox;
@@ -145,7 +148,7 @@ class Attack implements Common, Serializable {
             waveEngine.load(soundName, "sound/" + soundName + ".wav");
         }
     }
-    
+
     private void loadImage(String filename) {
         try {
             image = ImageIO.read(getClass().getResource(filename));
@@ -161,11 +164,12 @@ class Attack implements Common, Serializable {
         }
     }
 
+    // The attack moves across the screen.
     private class AttackAnimationThread extends Thread implements Serializable {
-        
+
         public void run() {
             waveEngine.play("boop");
-            
+
             for (int i = 0; i < weapon.getRange() * (CS / PROJECTILE_SPEED); i++) {
                 switch (direction) {
                     case UP:

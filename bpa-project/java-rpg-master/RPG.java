@@ -1,9 +1,5 @@
 
 import java.awt.*;
-import java.io.FileWriter;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Logger;
 import javax.swing.*;
 
@@ -15,7 +11,7 @@ public class RPG extends JFrame {
 
     public RPG() {
         // Set the title of the game.
-        setTitle("RPG");
+        setTitle("Argentium Unbound");
 
         // Create a MainPanel.
         MainPanel panel = new MainPanel();

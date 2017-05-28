@@ -1,12 +1,7 @@
 
 import java.awt.Point;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -69,11 +64,11 @@ public class Quest implements Serializable {
     public void setDXY(Point DXY) {
         this.DXY = DXY;
     }
-    
+
     public int getTarget() {
         return target;
     }
-    
+
     public void setTarget(int target) {
         this.target = target;
     }

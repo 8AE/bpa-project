@@ -3,9 +3,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.io.Serializable;
-import java.util.ArrayList;
-import javax.swing.ImageIcon;
-import java.util.List;
 
 /**
  * Created by Ahmad El-baba on 1/3/2017.
@@ -41,7 +38,7 @@ public class PauseWindow implements Common, Serializable {
 
         waveEngine = new WaveEngine();
         loadSound();
-        
+
         cursor = new Rectangle(295, 244, 100, 28);
         this.boarder = rect;
         innerRect = new Rectangle(
@@ -161,13 +158,13 @@ public class PauseWindow implements Common, Serializable {
     }
 
     private void loadSound() {
-        
+
         // load sound clip files
         for (String soundName : soundNames) {
             waveEngine.load(soundName, "sound/" + soundName + ".wav");
         }
     }
-    
+
     private class AnimationThread extends Thread {
 
         public void run() {

@@ -1,18 +1,15 @@
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.io.Serializable;
-import java.util.ArrayList;
-import javax.swing.ImageIcon;
-import java.util.List;
+
 /**
  * Created by Ahmad El-baba on 2/15/2017.
  */
 public class ShopWindow implements Common, Serializable {
 
     MessageEngine messageEngine;
-
-
 
     // width of white border
     private static final int EDGE_WIDTH = 2;
@@ -35,8 +32,8 @@ public class ShopWindow implements Common, Serializable {
 
     public ShopWindow(Rectangle rect) {
         messageEngine = new MessageEngine();
-      
-        cursor = new Rectangle(150, 300, 64, 64 );
+
+        cursor = new Rectangle(150, 300, 64, 64);
         this.boarder = rect;
         innerRect = new Rectangle(
                 rect.x + EDGE_WIDTH,
@@ -61,23 +58,16 @@ public class ShopWindow implements Common, Serializable {
         messageEngine.setColor(messageEngine.WHITE);
         g.setColor(Color.WHITE);
         messageEngine.drawMessage(256, 96, "SHOP", g);
-      
-      
-      
 
-        g.drawRect(cursor.x+ QUEST_SLOT_SPACING * ShopBoardSpot, cursor.y , cursor.width, cursor.height);
+        g.drawRect(cursor.x + QUEST_SLOT_SPACING * ShopBoardSpot, cursor.y, cursor.width, cursor.height);
 
-       
-        
     }
-    
+
     public void runThread() {
         // run thread
         threadAnimation = new Thread(new ShopWindow.AnimationThread());
         threadAnimation.start();
     }
-
-    
 
     public void show() {
         isVisible = true;
@@ -94,7 +84,7 @@ public class ShopWindow implements Common, Serializable {
                         //waveEngine.play("beep");
                         ShopBoardSpot--;
                     } else {
-                    ShopBoardSpot=2;
+                        ShopBoardSpot = 2;
                         //waveEngine.play("boop");
                     }
                 }
@@ -107,30 +97,34 @@ public class ShopWindow implements Common, Serializable {
                         //waveEngine.play("beep");
                         ShopBoardSpot++;
                     } else {
-                      ShopBoardSpot=0;
+                        ShopBoardSpot = 0;
                         //waveEngine.play("boop");
                     }
                 }
                 isMoving = false;
                 break;
-                
+
         }
     }
 
     public void hide() {
         isVisible = false;
     }
-    
+
     /**
-     * Checks if the cursor can move right by checking if the position is below the column count.
+     * Checks if the cursor can move right by checking if the position is below
+     * the column count.
+     *
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveRight() {
-        return (ShopBoardSpot >=1);
+        return (ShopBoardSpot >= 1);
     }
-    
+
     /**
-     * Checks if the cursor can move left by checking if the position is below the column count.
+     * Checks if the cursor can move left by checking if the position is below
+     * the column count.
+     *
      * @return whether or not the cursor can move down.
      */
     private boolean canMoveLeft() {

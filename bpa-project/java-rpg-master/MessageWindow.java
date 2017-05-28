@@ -1,9 +1,6 @@
 
 import java.awt.*;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
 import javax.swing.*;
 import java.util.*;
 import java.util.Timer;
@@ -43,7 +40,7 @@ public class MessageWindow implements Serializable {
 
     private MessageEngine messageEngine;
     private WaveEngine waveEngine;
-    
+
     // Sound Clips needed in the inventory window
     private static final String[] soundNames = {"beep"};
 
@@ -69,7 +66,7 @@ public class MessageWindow implements Serializable {
 
         // load sound clips
         loadSound();
-        
+
         // load cursor image
         ImageIcon icon = new ImageIcon(getClass().getResource("image/cursor.gif"));
         cursorImage = icon.getImage();
@@ -171,7 +168,7 @@ public class MessageWindow implements Serializable {
     public boolean isVisible() {
         return isVisible;
     }
-    
+
     /**
      * Load the sounds.
      */
